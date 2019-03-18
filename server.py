@@ -25,14 +25,15 @@ class Server():
         l = 0
         while True:
             if None!=self.newS:
-                if f != None:
-                    f.close()
-                f=open(self.newS + ".wav",'rb')
-                l=f.read(2048)
+                try:
+                    f=open(self.newS + ".wav",'rb')
+                    l=f.read(2048)
+                except:
+                    print ", this song does not exist"
                 self.newS = None
             if len(self.clients)>0 and l:
-                l=f.read(2048)
-                if l:
+                try:
+                    l=f.read(2048)
                     temp = self.clients
                     counter = 0
                     for clientSocket in temp:
@@ -42,15 +43,18 @@ class Server():
                             del self.clients[counter]
                             del self.clientsAdresess[counter]
                         counter = counter+1
+                except:
+                    pass
 
         f.close()
         clientSocket.send("ServerSentToClient")
 
     def newConnection(self):
-        while True: 
+        while True:
             (clientSocket,clientAddress)=self.server.accept()
             self.clients.append(clientSocket)
-            self.clientsAdresess.append(clientAddress)            
+            self.clientsAdresess.append(clientAddress)
+            
             print "welcome \n"
             
     def newSong(self):
