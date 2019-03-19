@@ -7,7 +7,7 @@ from threading import Thread
 class Server():
     def __init__(self):
         self.server=socket.socket()
-        self.server.bind(('0.0.0.0',3334))
+        self.server.bind(('0.0.0.0',3536))
         self.clients=[]
         self.clientsAdresess = []
         self.new = Thread(target = self.newConnection)
@@ -25,15 +25,25 @@ class Server():
         l = 0
         while True:
             if None!=self.newS:
-                try:
-                    f=open(self.newS + ".wav",'rb')
-                    l=f.read(2048)
-                except:
-                    print ", this song does not exist"
+                if f!= None and self.newS=="10":
+                    f.setpos(f.tell() + f.getframerate()*10)
+                    time.sleep(0.5)
+                elif f!= None and self.newS=="-10":
+                    if f.tell()/f.getframerate()>10:
+                        f.setpos(f.tell() - f.getframerate()*10)
+                    else:
+                        f.setpos(0)
+                    time.sleep(0.5)
+                else:
+                    try:
+                        f=wave.open(self.newS + ".wav",'rb')
+                        l=f.readframes(2048)
+                    except:
+                        print ", this song does not exist"
                 self.newS = None
             if len(self.clients)>0 and l:
                 try:
-                    l=f.read(2048)
+                    l=f.readframes(2048)
                     temp = self.clients
                     counter = 0
                     for clientSocket in temp:
