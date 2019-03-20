@@ -32,9 +32,10 @@ class Server():
         self.root.config(bg="DarkOrange3")
         self.root.geometry("800x550")
         self.root.resizable(0, 0)
+              
         self.file = None
         self.keepGoing = True
-
+        self.stop = False
         
         
     def main(self):
@@ -57,19 +58,20 @@ class Server():
             if len(self.clients)>0:
                 if l and self.file.tell()<=self.file.getnframes():
                     try:
-                        l=self.file.readframes(2048)
-                        temp = self.clients
-                        counter = 0
-                        for clientSocket in temp:
-                            try:
-                                clientSocket.send(l)
-                            except:
-                                del self.clients[counter]
-                                del self.clientsAdresess[counter]
-                            counter = counter+1
+                        if not self.stop:
+                            l=self.file.readframes(2048)
+                            temp = self.clients
+                            counter = 0
+                            for clientSocket in temp:
+                                try:
+                                    clientSocket.send(l)
+                                except:
+                                    del self.clients[counter]
+                                    del self.clientsAdresess[counter]
+                                counter = counter+1
                     except:
                         pass
-                else: #play random song
+                elif not self.stop: #play random song
                     maybeSong = self.song
                     while self.song==maybeSong:
                         temp = random.choice(os.listdir(os.path.dirname(os.path.abspath(__file__))))
@@ -93,8 +95,14 @@ class Server():
     def chooseNewSong(self):
         self.newS = fb.askopenfilename(title = "Select file",filetypes=[("Wave files", "*.wav")])
 
+    def stopGoing(self):
+        self.stop = True
+        
+    def Going(self):
+        self.stop = False
+        
     def changeSongTime(self,check,e):
-        if check==None:
+        if check==None and self.file!= None:
             self.file.setpos(0)
         elif self.file!= None and e!=None and e.get()!="":
             x = int(e.get())
@@ -130,6 +138,11 @@ class Server():
         large_font = ('Verdana',25)
         e = Tkinter.Entry(self.root,font=large_font,justify='center', validate='all', validatecommand=(vcmd, '%P'))
 
+        stopTheSong = Tkinter.Button(self.root, text ="Stop", command = lambda: self.stopGoing(),bg="wheat1",font = helv2)
+        playTheSong = Tkinter.Button(self.root, text ="Play", command = lambda: self.Going(),bg="wheat1",font = helv2)
+        stopTheSong.config(height=3, width = 20)
+        playTheSong.config(height=3, width = 20)
+        
         timeChangeF = Tkinter.Button(self.root, text ="Forward", command = lambda: self.changeSongTime(True,e),bg="tomato",font = helv2)
         timeChangeB = Tkinter.Button(self.root, text ="Backward", command = lambda: self.changeSongTime(False,e),bg="tomato",font = helv2)
         timeReset = Tkinter.Button(self.root, text ="Restart The Song", command = lambda: self.changeSongTime(None,e),bg="tomato",font = helv2)
@@ -137,6 +150,8 @@ class Server():
         timeChangeB.config(height=3, width = 20)
         timeChangeF.config(height=3, width = 20)
         e.pack()
+        stopTheSong.pack()
+        playTheSong.pack()
         timeReset.pack()
         timeChangeF.pack()
         timeChangeB.pack()
