@@ -13,7 +13,7 @@ import tkFont
 class Server():
     def __init__(self):
         self.server=socket.socket()
-        self.server.bind(('0.0.0.0',5438))
+        self.server.bind(('0.0.0.0',5538))
         self.clients=[]
         self.clientsAdresess = []
         
@@ -28,11 +28,15 @@ class Server():
         self.root = Tkinter.Tk()
         self.root.title("Music Party Controller")
         self.root.protocol("WM_DELETE_WINDOW", self.callback)
-        self.root.wm_iconbitmap('head.ico')
+        self.root.wm_iconbitmap('pictures\\head.ico')
         self.root.config(bg="DarkOrange3")
         self.root.geometry("800x550")
         self.root.resizable(0, 0)
-              
+        
+        photo = Tkinter.PhotoImage(file="pictures\\b.gif")
+        self.w = Tkinter.Label(self.root, image=photo)
+        self.w.photo = photo
+        self.w.pack()
         self.file = None
         self.keepGoing = True
         self.stop = False
@@ -49,15 +53,18 @@ class Server():
             if None!=self.newS:
                 if self.newS!="":
                     try:
+                        if self.file!=None:
+                            self.file.close()
                         self.file=wave.open(self.newS,'rb')
                         l=self.file.readframes(2048)
                         self.song = self.newS
                         self.newS = None
+                        self.stop=False
                     except:
-                        print ", this song does not exist"
+                        print "sorry, there is a problem"
             if len(self.clients)>0:
                 if l and self.file.tell()<=self.file.getnframes():
-                    try:
+                    #try:
                         if not self.stop:
                             l=self.file.readframes(2048)
                             temp = self.clients
@@ -66,18 +73,18 @@ class Server():
                                 try:
                                     clientSocket.send(l)
                                 except:
+                                    print "good bye " + str(self.clientsAdresess[counter])
                                     del self.clients[counter]
                                     del self.clientsAdresess[counter]
                                 counter = counter+1
-                    except:
-                        pass
-                elif not self.stop: #play random song
+                    #except:
+                elif not self.stop and len(self.clients)>0: #play random song
                     maybeSong = self.song
                     while self.song==maybeSong:
-                        temp = random.choice(os.listdir(os.path.dirname(os.path.abspath(__file__))))
+                        temp = random.choice(os.listdir(os.getcwd()+"\\songs"))
                         if ".wav" in temp:
                             maybeSong=temp
-                    self.newS = maybeSong
+                    self.newS = "songs\\"+maybeSong
                     
         if self.file!=None:
             self.file.close()
@@ -93,8 +100,7 @@ class Server():
             print "welcome " + str(clientAddress) + "\n"
             
     def chooseNewSong(self):
-        self.newS = fb.askopenfilename(title = "Select file",filetypes=[("Wave files", "*.wav")])
-
+        self.newS = fb.askopenfilename(initialdir=os.getcwd()+"\\songs",title = "Select file",filetypes=[("Wave files", "*.wav")])
     def stopGoing(self):
         self.stop = True
         
@@ -109,6 +115,8 @@ class Server():
             if check:
                 if (self.file.getnframes() - self.file.tell())/self.file.getframerate() > x:
                     self.file.setpos(self.file.tell() + self.file.getframerate()*x)
+                else:
+                    self.file.setpos(self.file.getnframes())
             else:
                 if self.file.tell()/self.file.getframerate()>x:
                     self.file.setpos(self.file.tell() - self.file.getframerate()*x)
@@ -131,7 +139,7 @@ class Server():
         helv2 = tkFont.Font(family='Helvetica', size=10, weight='bold')
         changeSong = Tkinter.Button(self.root, text ="Choose song", command = self.chooseNewSong,bg="light goldenrod",font = helv36)
         changeSong.config(height=2 , width = 15)
-        changeSong.pack()
+        changeSong.place(x=308, y=5)
 
         vcmd = (self.root.register(self.CheckIfNumber))
         
@@ -149,12 +157,12 @@ class Server():
         timeReset.config(height=3, width = 20)
         timeChangeB.config(height=3, width = 20)
         timeChangeF.config(height=3, width = 20)
-        e.pack()
-        stopTheSong.pack()
-        playTheSong.pack()
-        timeReset.pack()
-        timeChangeF.pack()
-        timeChangeB.pack()
+        e.place(x=187, y=100)
+        stopTheSong.place(x=478, y=287)
+        playTheSong.place(x=156, y=287)
+        timeReset.place(x=315, y=150)
+        timeChangeB.place(x=145, y=150)
+        timeChangeF.place(x=485, y=150)
         self.root.mainloop()
         
 if __name__ == "__main__":
