@@ -15,7 +15,7 @@ class Server():
 
         #creating my socket to connect with others
         self.server=socket.socket()
-        self.server.bind(('0.0.0.0',5538))
+        self.server.bind(('0.0.0.0',5540))
         self.server.listen(10)
 
         #to save the info about my clients
@@ -53,6 +53,16 @@ class Server():
     def musicSender(self):
         l = 0
         while self.keepGoing: #if the gui is still open
+            if self.song!= None:
+                #taking only the song name 
+                temp = self.song.split("\\")
+                name = temp[len(temp)-1]
+                temp = name.split("/")
+                name = temp[len(temp)-1]
+                name = name.split(".")[0]
+                        
+                self.currentSongDisplay.config(text=str(name.upper()))#showing the song name on the screen
+
             if None!=self.newS: #if there is new song being asked
                 if self.newS!="": #to check it is not empty string
                     try:
@@ -62,12 +72,11 @@ class Server():
                         l=self.file.readframes(2048) #read from the new song
                         self.song = self.newS #save the current song
                         self.newS = None
-                        self.stop=False
                     except:
                         print "sorry, there is a problem"
             if len(self.clients)>0: #if there is someone connected
                 if l and self.file.tell()<=self.file.getnframes(): #if thre is info and the song is not over
-                    try:
+                    try:                        
                         if not self.stop: #if the song is not on stop mode
                             l=self.file.readframes(2048) #read from the song file
                             temp = self.clients #to prevent problems
@@ -103,15 +112,21 @@ class Server():
             self.clientsAdresess.append(clientAddress)            
             print "welcome " + str(clientAddress) + "\n"
             
-    def chooseNewSong(self): #open window to let the controller choose a new song
+    def chooseNewSong(self,b): #open window to let the controller choose a new song
         self.newS = fb.askopenfilename(initialdir=os.getcwd()+"\\songs",title = "Select file",filetypes=[("Wave files", "*.wav")])
+        self.setPlayStatus(b) #when choosing new song put on playing mode
 
+    def setPlayStatus(self,b): #when choosing new song put on playing mode
+        b.config(text="Stop",bg="red3")
+        self.stop = False
+    
     def changeStatus(self,b): #stop/play the song when the button is being pressed
         if self.stop:
             b.config(text="Stop",bg="red3")
         else:
             b.config(text="Play",bg="lawn green")
         self.stop = not self.stop
+        
             
     def changeSongTime(self,check,e): #move to time that needed when the button being pressed
         if check==None and self.file!= None: #if the restart button is being pressed
@@ -174,12 +189,15 @@ class Server():
         #creating the entry
         e = Tkinter.Entry(self.root,font=large_font,justify='center', validate='all', validatecommand=(vcmd, '%P'))
 
+        #Text for showing the current song
+        self.currentSongDisplay = Tkinter.Label(self.root,text="No song",font="Times 20",fg="white",bg="black")
+        
         #creating the buttons
         playOrStop = Tkinter.Button(self.root, text ="Stop", command = lambda: self.changeStatus(playOrStop),bg="red3",font = helv2)        
-        timeChangeF = Tkinter.Button(self.root, text ="Forward", command = lambda: self.changeSongTime(True,e),bg="tomato",font = helv2)
-        timeChangeB = Tkinter.Button(self.root, text ="Backward", command = lambda: self.changeSongTime(False,e),bg="tomato",font = helv2)
-        timeReset = Tkinter.Button(self.root, text ="Restart The Song", command = lambda: self.changeSongTime(None,e),bg="tomato",font = helv2)
-        changeSong = Tkinter.Button(self.root, text ="Choose song", command = self.chooseNewSong,bg="light goldenrod",font = helv36)
+        timeChangeF = Tkinter.Button(self.root, text ="Forward", command = lambda: self.changeSongTime(True,e),bg="white",font = helv2)
+        timeChangeB = Tkinter.Button(self.root, text ="Backward", command = lambda: self.changeSongTime(False,e),bg="white",font = helv2)
+        timeReset = Tkinter.Button(self.root, text ="Restart The Song", command = lambda: self.changeSongTime(None,e),bg="white",font = helv2)
+        changeSong = Tkinter.Button(self.root, text ="Choose song", command = lambda: self.chooseNewSong(playOrStop),bg="white",font = helv36)
 
         #setting the size of all the objects
         playOrStop.config(height=3, width = 20)
@@ -187,7 +205,7 @@ class Server():
         timeReset.config(height=3, width = 20)
         timeChangeB.config(height=3, width = 20)
         timeChangeF.config(height=3, width = 20)
-
+    
         #placing everything
         changeSong.place(x=308, y=80)
         e.place(x=187, y=180)
@@ -195,6 +213,7 @@ class Server():
         timeReset.place(x=315, y=260)
         timeChangeB.place(x=145, y=260)
         timeChangeF.place(x=485, y=260)
+        self.currentSongDisplay.place(x=0,y=0)
         
 if __name__ == "__main__":
     music_party = Server() 
