@@ -26,26 +26,18 @@ class Server():
         self.song = None
         
         self.root = Tkinter.Tk()
-        self.root.title("Music Party Controller")
-        self.root.protocol("WM_DELETE_WINDOW", self.callback)
-        self.root.wm_iconbitmap('pictures\\head.ico')
-        self.root.config(bg="DarkOrange3")
-        self.root.geometry("800x550")
-        self.root.resizable(0, 0)
         
-        photo = Tkinter.PhotoImage(file="pictures\\b.gif")
-        self.w = Tkinter.Label(self.root, image=photo)
-        self.w.photo = photo
-        self.w.pack()
         self.file = None
         self.keepGoing = True
         self.stop = False
-        
+
+        self.CreateTheControllBoared()
         
     def main(self):
         self.new.start()
         self.music.start()
-        self.newSong()
+        
+        self.root.mainloop()
 
     def musicSender(self):
         l = 0
@@ -101,12 +93,14 @@ class Server():
             
     def chooseNewSong(self):
         self.newS = fb.askopenfilename(initialdir=os.getcwd()+"\\songs",title = "Select file",filetypes=[("Wave files", "*.wav")])
-    def stopGoing(self):
-        self.stop = True
-        
-    def Going(self):
-        self.stop = False
-        
+
+    def changeStatus(self,b):
+        if self.stop:
+            b.config(text="Stop",bg="red3")
+        else:
+            b.config(text="Play",bg="lawn green")
+        self.stop = not self.stop
+            
     def changeSongTime(self,check,e):
         if check==None and self.file!= None:
             self.file.setpos(0)
@@ -134,22 +128,32 @@ class Server():
         else:
             return False
             
-    def newSong(self):
+    def CreateTheControllBoared(self):
+        self.root.title("Music Party Controller")
+        self.root.protocol("WM_DELETE_WINDOW", self.callback)
+        self.root.wm_iconbitmap('pictures\\head.ico')
+        self.root.config(bg="DarkOrange3")
+        self.root.geometry("800x550")
+        self.root.resizable(0, 0)
+        
+        photo = Tkinter.PhotoImage(file="pictures\\b.gif")
+        self.w = Tkinter.Label(self.root, image=photo)
+        self.w.photo = photo
+        self.w.pack()
+        
         helv36 = tkFont.Font(family='Helvetica', size=15, weight='bold')
         helv2 = tkFont.Font(family='Helvetica', size=10, weight='bold')
         changeSong = Tkinter.Button(self.root, text ="Choose song", command = self.chooseNewSong,bg="light goldenrod",font = helv36)
         changeSong.config(height=2 , width = 15)
-        changeSong.place(x=308, y=5)
+        
 
         vcmd = (self.root.register(self.CheckIfNumber))
         
         large_font = ('Verdana',25)
         e = Tkinter.Entry(self.root,font=large_font,justify='center', validate='all', validatecommand=(vcmd, '%P'))
 
-        stopTheSong = Tkinter.Button(self.root, text ="Stop", command = lambda: self.stopGoing(),bg="wheat1",font = helv2)
-        playTheSong = Tkinter.Button(self.root, text ="Play", command = lambda: self.Going(),bg="wheat1",font = helv2)
-        stopTheSong.config(height=3, width = 20)
-        playTheSong.config(height=3, width = 20)
+        playOrStop = Tkinter.Button(self.root, text ="Stop", command = lambda: self.changeStatus(playOrStop),bg="red3",font = helv2)
+        playOrStop.config(height=3, width = 20)
         
         timeChangeF = Tkinter.Button(self.root, text ="Forward", command = lambda: self.changeSongTime(True,e),bg="tomato",font = helv2)
         timeChangeB = Tkinter.Button(self.root, text ="Backward", command = lambda: self.changeSongTime(False,e),bg="tomato",font = helv2)
@@ -157,13 +161,13 @@ class Server():
         timeReset.config(height=3, width = 20)
         timeChangeB.config(height=3, width = 20)
         timeChangeF.config(height=3, width = 20)
-        e.place(x=187, y=100)
-        stopTheSong.place(x=478, y=287)
-        playTheSong.place(x=156, y=287)
-        timeReset.place(x=315, y=150)
-        timeChangeB.place(x=145, y=150)
-        timeChangeF.place(x=485, y=150)
-        self.root.mainloop()
+        
+        changeSong.place(x=308, y=80)
+        e.place(x=187, y=180)
+        playOrStop.place(x=315, y=320)
+        timeReset.place(x=315, y=260)
+        timeChangeB.place(x=145, y=260)
+        timeChangeF.place(x=485, y=260)
         
 if __name__ == "__main__":
     x = Server()
