@@ -15,7 +15,7 @@ class Server():
 
         #creating my socket to connect with others
         self.server=socket.socket()
-        self.server.bind(('0.0.0.0',5540))
+        self.server.bind(('0.0.0.0',5541))
         self.server.listen(10)
 
         #to save the info about my clients
@@ -36,7 +36,6 @@ class Server():
         self.file = None #the file of the song
         self.keepGoing = True #controll the running system
         self.stop = False #stop or play the song
-
         #placing and creating the gui
         self.CreateTheControllBoared()
         
@@ -47,22 +46,13 @@ class Server():
         #thread for sending the data
         self.music.start()
 
-        #needed to make the gui work properly
+        #needed to make the GUI work properly
         self.root.mainloop()
-
+        
     def musicSender(self):
-        l = 0
+        l = 0 #false
         while self.keepGoing: #if the gui is still open
-            if self.song!= None:
-                #taking only the song name 
-                temp = self.song.split("\\")
-                name = temp[len(temp)-1]
-                temp = name.split("/")
-                name = temp[len(temp)-1]
-                name = name.split(".")[0]
-                        
-                self.currentSongDisplay.config(text=str(name.upper()))#showing the song name on the screen
-
+            self.updateData() #updating the data about the songs that shown
             if None!=self.newS: #if there is new song being asked
                 if self.newS!="": #to check it is not empty string
                     try:
@@ -101,7 +91,7 @@ class Server():
                     
         if self.file!=None:
             self.file.close()
-        for clientSocket in self.clients:
+        for clientSocket in self.clients: #disconnect from all the clients
             clientSocket.send("ServerSentToClient")
             clientSocket.close()
             
@@ -112,6 +102,28 @@ class Server():
             self.clientsAdresess.append(clientAddress)            
             print "welcome " + str(clientAddress) + "\n"
             
+    def updateData(self): #updating the data on the screen
+        if not self.stop:
+            if self.file!=None:
+                #taking only the song name
+                temp = self.song.split("\\")
+                name = temp[len(temp)-1]
+                temp = name.split("/")
+                name = temp[len(temp)-1]
+                name = name.split(".")[0]
+                self.currentSongDisplay.config(text=str(name.upper()))#showing the song name on the screen
+                time = (self.file.getnframes() - self.file.tell())/self.file.getframerate()
+                minutes = time /60
+                seconds = time % 60
+                if seconds<10:
+                    seconds = "0" + str(seconds)
+                if minutes<10:
+                    minutes = "0" + str(minutes)
+                time = str(minutes) + ":" + str(seconds)
+                self.TimeLeft.configure(text=time) #showing how much time is left fot the song
+            else:
+                self.TimeLeft.configure(text="0")
+
     def chooseNewSong(self,b): #open window to let the controller choose a new song
         self.newS = fb.askopenfilename(initialdir=os.getcwd()+"\\songs",title = "Select file",filetypes=[("Wave files", "*.wav")])
         self.setPlayStatus(b) #when choosing new song put on playing mode
@@ -191,7 +203,7 @@ class Server():
 
         #Text for showing the current song
         self.currentSongDisplay = Tkinter.Label(self.root,text="No song",font="Times 20",fg="white",bg="black")
-        
+        self.TimeLeft = Tkinter.Label(self.root,text="0",font="Times 20",fg="white",bg="black")        
         #creating the buttons
         playOrStop = Tkinter.Button(self.root, text ="Stop", command = lambda: self.changeStatus(playOrStop),bg="red3",font = helv2)        
         timeChangeF = Tkinter.Button(self.root, text ="Forward", command = lambda: self.changeSongTime(True,e),bg="white",font = helv2)
@@ -214,6 +226,7 @@ class Server():
         timeChangeB.place(x=145, y=260)
         timeChangeF.place(x=485, y=260)
         self.currentSongDisplay.place(x=0,y=0)
+        self.TimeLeft.place(x=0,y=30)
         
 if __name__ == "__main__":
     music_party = Server() 
