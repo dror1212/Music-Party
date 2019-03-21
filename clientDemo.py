@@ -7,7 +7,7 @@ FSAMP = 88800
 FRAME_SIZE = 2048
 p = pyaudio.PyAudio()
 clientSocket=socket.socket()
-clientSocket.connect(('192.168.0.103',3334))
+clientSocket.connect(('192.168.0.103',5538))
 stream = p.open(format=FORMAT,
                 channels=1,
                 rate=FSAMP,
@@ -21,7 +21,10 @@ while(l):
         break
     frames.append(l)
     stream.write(l)
-    l = clientSocket.recv(2048)
-
+    try:
+        l = clientSocket.recv(2048)
+    except:
+        break
+clientSocket.close()
 stream.stop_stream()
 stream.close()
