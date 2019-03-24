@@ -64,7 +64,13 @@ class Server():
                             self.file.close() #close the last song
                         self.file=wave.open(self.newS,'rb') #open the new song
                         l=self.file.readframes(32) #read from the new song
-                        self.song = self.newS #save the current song
+
+                        #save the current song with the right syntax
+                        temp = self.newS.split("\\")                        
+                        temp = temp[len(temp)-1] 
+                        temp = temp.split("/")
+                        self.song = temp[len(temp)-1]
+                        
                         self.newS = None
                     except:
                         print "sorry, there is a problem"
@@ -89,6 +95,8 @@ class Server():
                     maybeSong = self.song #make sure the random song is not the last one
                     while self.song==maybeSong: #make sure the random song is not the last one
                         temp = random.choice(os.listdir(os.getcwd()+"\\songs")) #choose random file from the songs
+                        print temp
+                        print self.song
                         if ".wav" in temp:
                             maybeSong=temp
                     self.newS = "songs\\"+maybeSong #save the path to the song
@@ -110,12 +118,7 @@ class Server():
         if not self.stop:
             if self.file!=None:
                 #taking only the song name
-                temp = self.song.split("\\")
-                name = temp[len(temp)-1]
-                temp = name.split("/")
-                name = temp[len(temp)-1]
-                name = name.split(".")[0]
-                self.currentSongDisplay.config(text=str(name.upper()))#showing the song name on the screen
+                self.currentSongDisplay.config(text=str(self.song.upper()))#showing the song name on the screen
                 time = (self.file.getnframes() - self.file.tell())/self.file.getframerate()
                 minutes = time /60
                 seconds = time % 60
