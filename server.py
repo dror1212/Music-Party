@@ -15,7 +15,7 @@ class Server():
 
         #creating my socket to connect with others
         self.server=socket.socket()
-        self.server.bind(('0.0.0.0',5541))
+        self.server.bind(('0.0.0.0',3334))
         self.server.listen(10)
 
         #to save the info about my clients
@@ -59,7 +59,7 @@ class Server():
                         if self.file!=None: #if its not the first song being played
                             self.file.close() #close the last song
                         self.file=wave.open(self.newS,'rb') #open the new song
-                        l=self.file.readframes(2048) #read from the new song
+                        l=self.file.readframes(16) #read from the new song
                         self.song = self.newS #save the current song
                         self.newS = None
                     except:
@@ -68,7 +68,7 @@ class Server():
                 if l and self.file.tell()<=self.file.getnframes(): #if thre is info and the song is not over
                     try:                        
                         if not self.stop: #if the song is not on stop mode
-                            l=self.file.readframes(2048) #read from the song file
+                            l=self.file.readframes(16) #read from the song file
                             temp = self.clients #to prevent problems
                             counter = 0
                             for clientSocket in temp: #send to all the clients the music
@@ -149,7 +149,7 @@ class Server():
                 if (self.file.getnframes() - self.file.tell())/self.file.getframerate() > x: 
                     self.file.setpos(self.file.tell() + self.file.getframerate()*x)
                 else:
-                    self.file.setpos(self.file.getnframes())
+                    self.file.setpos(self.file.getframes())
             else: #if backward is being pressed
                 if self.file.tell()/self.file.getframerate()>x:
                     self.file.setpos(self.file.tell() - self.file.getframerate()*x)
