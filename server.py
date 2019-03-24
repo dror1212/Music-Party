@@ -52,14 +52,18 @@ class Server():
     def musicSender(self):
         l = 0 #false
         while self.keepGoing: #if the gui is still open
-            self.updateData() #updating the data about the songs that shown
+            #for a case there are conflics wioth the main thread
+            try:
+                self.updateData() #updating the data about the songs that shown
+            except:
+                pass
             if None!=self.newS: #if there is new song being asked
                 if self.newS!="": #to check it is not empty string
                     try:
                         if self.file!=None: #if its not the first song being played
                             self.file.close() #close the last song
                         self.file=wave.open(self.newS,'rb') #open the new song
-                        l=self.file.readframes(16) #read from the new song
+                        l=self.file.readframes(32) #read from the new song
                         self.song = self.newS #save the current song
                         self.newS = None
                     except:
@@ -68,7 +72,7 @@ class Server():
                 if l and self.file.tell()<=self.file.getnframes(): #if thre is info and the song is not over
                     try:                        
                         if not self.stop: #if the song is not on stop mode
-                            l=self.file.readframes(16) #read from the song file
+                            l=self.file.readframes(32) #read from the song file
                             temp = self.clients #to prevent problems
                             counter = 0
                             for clientSocket in temp: #send to all the clients the music
