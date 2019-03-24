@@ -52,7 +52,7 @@ class Server():
     def musicSender(self):
         l = 0 #false
         while self.keepGoing: #if the gui is still open
-            #for a case there are conflics wioth the main thread
+            #for a case there are conflics with the main thread
             try:
                 self.updateData() #updating the data about the songs that shown
             except:
@@ -153,7 +153,7 @@ class Server():
                 if (self.file.getnframes() - self.file.tell())/self.file.getframerate() > x: 
                     self.file.setpos(self.file.tell() + self.file.getframerate()*x)
                 else:
-                    self.file.setpos(self.file.getframes())
+                    self.file.setpos(self.file.getnframes())
             else: #if backward is being pressed
                 if self.file.tell()/self.file.getframerate()>x:
                     self.file.setpos(self.file.tell() - self.file.getframerate()*x)
