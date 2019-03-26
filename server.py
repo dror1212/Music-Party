@@ -118,7 +118,8 @@ class Server():
         if not self.stop:
             if self.file!=None:
                 #taking only the song name
-                self.currentSongDisplay.config(text=str(self.song.upper()))#showing the song name on the screen
+                name = self.song.split(".wav")[0]
+                self.currentSongDisplay.config(text=str(name.upper()))#showing the song name on the screen
                 time = (self.file.getnframes() - self.file.tell())/self.file.getframerate()
                 minutes = time /60
                 seconds = time % 60
