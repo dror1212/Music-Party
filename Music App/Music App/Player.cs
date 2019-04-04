@@ -38,16 +38,11 @@ namespace Music_App
         [return: GeneratedEnum]
         public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
         {
-            switch (intent.Action)
-            {
-                case ActionPlay: PlayAsync(); break;
-                case ActionStop: Stop(); break;
-                case ActionPause: Pause(); break;
-            }
+            Play();
             //Set sticky as we are a long running operation
             return StartCommandResult.Sticky;
         }
-        private async System.Threading.Tasks.Task PlayAsync()
+        private async System.Threading.Tasks.Task Play()
         {
             player = new MediaPlayer();
             //Tell our player to stream music

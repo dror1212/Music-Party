@@ -22,7 +22,7 @@ namespace Music_App
 
         private void Btn1_Click(object sender, System.EventArgs e)
         {
-            var intent = new Intent(Player.ActionPlay);
+            Intent intent = new Intent(this,typeof(Player));
             StartService(intent);
         }
     }
