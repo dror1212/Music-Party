@@ -32,7 +32,8 @@ class Server():
 
         #creating the base for the gui
         self.root = Tkinter.Tk()
-
+        self.register_screen = None
+        
         #info I need to use in all the code
         self.newS = None #saving the location for new songs
         self.song = None #the song that currently is running       
@@ -178,29 +179,35 @@ class Server():
             return True
         else:
             return False
-
+        
+    def res(self):
+        self.register_screen.destroy()
+        self.register_screen = None
+        
     def registerationPage(self):
-        register_screen = Tkinter.Toplevel(self.root)
-        register_screen.title("Register")
-        register_screen.geometry("300x250")
-        register_screen.wm_iconbitmap('pictures\\head.ico')
-        register_screen.resizable(0, 0)
-        username = Tkinter.StringVar()
-        password = Tkinter.StringVar()
- 
-        self.msg = Tkinter.Label(register_screen, text="Please enter details below", bg="grey")
-        self.msg.pack()
-        Tkinter.Label(register_screen, text="").pack()
-        username_lable = Tkinter.Label(register_screen, text="Username * ")
-        username_lable.pack()
-        username_entry = Tkinter.Entry(register_screen, textvariable=username)
-        username_entry.pack()
-        password_lable = Tkinter.Label(register_screen, text="Password * ")
-        password_lable.pack()
-        password_entry = Tkinter.Entry(register_screen, textvariable=password, show='*')
-        password_entry.pack()
-        Tkinter.Label(register_screen, text="").pack()
-        Tkinter.Button(register_screen, text="Register", width=10, height=1, bg="blue", command = lambda: self.register_user(username.get(),password.get())).pack()
+        if self.register_screen == None:
+            self.register_screen = Tkinter.Toplevel(self.root)
+            self.register_screen.title("Register")
+            self.register_screen.geometry("300x250")
+            self.register_screen.wm_iconbitmap('pictures\\head.ico')
+            self.register_screen.protocol("WM_DELETE_WINDOW", self.res)
+            self.register_screen.resizable(0, 0)
+            username = Tkinter.StringVar()
+            password = Tkinter.StringVar()
+     
+            self.msg = Tkinter.Label(self.register_screen, text="Please enter details below", bg="grey")
+            self.msg.pack()
+            Tkinter.Label(self.register_screen, text="").pack()
+            username_lable = Tkinter.Label(self.register_screen, text="Username * ")
+            username_lable.pack()
+            username_entry = Tkinter.Entry(self.register_screen, textvariable=username)
+            username_entry.pack()
+            password_lable = Tkinter.Label(self.register_screen, text="Password * ")
+            password_lable.pack()
+            password_entry = Tkinter.Entry(self.register_screen, textvariable=password, show='*')
+            password_entry.pack()
+            Tkinter.Label(self.register_screen, text="").pack()
+            Tkinter.Button(self.register_screen, text="Register", width=10, height=1, bg="grey", command = lambda: self.register_user(username.get(),password.get())).pack()
 
     def register_user(self,username,password):
         try:
@@ -212,10 +219,10 @@ class Server():
             with open('DataBase.txt', 'rb') as data_base:
                 b = pickle.load(data_base)
         if username in b.keys():
-            self.msg.config(text="This username is already exist")
+            self.msg.config(text="The username " + username + " is already exist")
         else:
             b[username] = password
-            
+            self.msg.config(text="Username " + username + " was created succesfully")
             with open("DataBase.txt", 'wb') as data_base:
                 pickle.dump(b, data_base, protocol=pickle.HIGHEST_PROTOCOL)
             
