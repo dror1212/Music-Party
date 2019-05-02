@@ -9,13 +9,14 @@ import tkMessageBox
 import os
 import random
 import tkFont
+import pickle
 
 class Server():
     def __init__(self):
 
         #creating my socket to connect with others
         self.server=socket.socket()
-        self.server.bind(('0.0.0.0',3334))
+        self.server.bind(('0.0.0.0',3338))
         self.server.listen(10)
 
         #to save the info about my clients
@@ -89,7 +90,7 @@ class Server():
                                     del self.clientsAdresess[counter]
                                 counter = counter+1
                     except:
-                        pass
+                        print "sorry, there is a problem 2"
                 elif not self.stop and len(self.clients)>0: #play random song if no song has been chosen
                     maybeSong = self.song #make sure the random song is not the last one
                     while self.song==maybeSong: #make sure the random song is not the last one
@@ -133,7 +134,7 @@ class Server():
                 else:
                     self.TimeLeft.configure(text="0")
             except:
-                pass
+                print "I want to know"
 
     def chooseNewSong(self,b): #open window to let the controller choose a new song
         self.newS = fb.askopenfilename(initialdir=os.getcwd()+"\\songs",title = "Select file",filetypes=[("Wave files", "*.wav")])
@@ -182,11 +183,13 @@ class Server():
         register_screen = Tkinter.Toplevel(self.root)
         register_screen.title("Register")
         register_screen.geometry("300x250")
+        register_screen.wm_iconbitmap('pictures\\head.ico')
         register_screen.resizable(0, 0)
         username = Tkinter.StringVar()
         password = Tkinter.StringVar()
  
-        Tkinter.Label(register_screen, text="Please enter details below", bg="blue").pack()
+        self.msg = Tkinter.Label(register_screen, text="Please enter details below", bg="grey")
+        self.msg.pack()
         Tkinter.Label(register_screen, text="").pack()
         username_lable = Tkinter.Label(register_screen, text="Username * ")
         username_lable.pack()
@@ -200,8 +203,23 @@ class Server():
         Tkinter.Button(register_screen, text="Register", width=10, height=1, bg="blue", command = lambda: self.register_user(username.get(),password.get())).pack()
 
     def register_user(self,username,password):
-        print username
-        print password
+        try:
+            with open('DataBase.txt', 'rb') as data_base:
+                b = pickle.load(data_base)
+        except:
+            with open("DataBase.txt", 'wb') as data_base:
+                pickle.dump({}, data_base, protocol=pickle.HIGHEST_PROTOCOL)
+            with open('DataBase.txt', 'rb') as data_base:
+                b = pickle.load(data_base)
+        if username in b.keys():
+            self.msg.config(text="This username is already exist")
+        else:
+            b[username] = password
+            
+            with open("DataBase.txt", 'wb') as data_base:
+                pickle.dump(b, data_base, protocol=pickle.HIGHEST_PROTOCOL)
+            
+        data_base.close()
         
     def CreateTheControllBoared(self):
         #setting the title
