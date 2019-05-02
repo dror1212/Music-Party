@@ -1,7 +1,7 @@
 import socket
 import pyaudio
 import wave
-import time
+from time import sleep
 from threading import Thread
 import Tkinter
 import tkFileDialog as fb
@@ -27,6 +27,8 @@ class Server():
         #thread for sending the data
         self.music = Thread(target = self.musicSender)
 
+        self.update = Thread(target = self.updateData)
+
         #creating the base for the gui
         self.root = Tkinter.Tk()
 
@@ -46,17 +48,14 @@ class Server():
         #thread for sending the data
         self.music.start()
 
+        self.update.start()
+        
         #needed to make the GUI work properly
         self.root.mainloop()
         
     def musicSender(self):
         l = 0 #false
         while self.keepGoing: #if the gui is still open
-            #for a case there are conflics with the main thread
-            try:
-                self.updateData() #updating the data about the songs that shown
-            except:
-                pass
             if None!=self.newS: #if there is new song being asked
                 if self.newS!="": #to check it is not empty string
                     try:
@@ -115,22 +114,26 @@ class Server():
             print "welcome " + str(clientAddress) + "\n"
             
     def updateData(self): #updating the data on the screen
-        if not self.stop:
-            if self.file!=None:
-                #taking only the song name
-                name = self.song.split(".wav")[0]
-                self.currentSongDisplay.config(text=str(name.upper()))#showing the song name on the screen
-                time = (self.file.getnframes() - self.file.tell())/self.file.getframerate()
-                minutes = time /60
-                seconds = time % 60
-                if seconds<10:
-                    seconds = "0" + str(seconds)
-                if minutes<10:
-                    minutes = "0" + str(minutes)
-                time = str(minutes) + ":" + str(seconds)
-                self.TimeLeft.configure(text=time) #showing how much time is left fot the song
-            else:
-                self.TimeLeft.configure(text="0")
+        while self.keepGoing:
+            try:
+                sleep(0.5)
+                if self.file!=None and not self.stop:
+                    #taking only the song name
+                    name = self.song.split(".wav")[0]
+                    self.currentSongDisplay.config(text=str(name.upper()))#showing the song name on the screen
+                    time = (self.file.getnframes() - self.file.tell())/self.file.getframerate()
+                    minutes = time /60
+                    seconds = time % 60
+                    if seconds<10:
+                        seconds = "0" + str(seconds)
+                    if minutes<10:
+                        minutes = "0" + str(minutes)
+                    time = str(minutes) + ":" + str(seconds)
+                    self.TimeLeft.configure(text=time) #showing how much time is left fot the song
+                else:
+                    self.TimeLeft.configure(text="0")
+            except:
+                pass
 
     def chooseNewSong(self,b): #open window to let the controller choose a new song
         self.newS = fb.askopenfilename(initialdir=os.getcwd()+"\\songs",title = "Select file",filetypes=[("Wave files", "*.wav")])
@@ -174,7 +177,32 @@ class Server():
             return True
         else:
             return False
-            
+
+    def registerationPage(self):
+        register_screen = Tkinter.Toplevel(self.root)
+        register_screen.title("Register")
+        register_screen.geometry("300x250")
+        register_screen.resizable(0, 0)
+        username = Tkinter.StringVar()
+        password = Tkinter.StringVar()
+ 
+        Tkinter.Label(register_screen, text="Please enter details below", bg="blue").pack()
+        Tkinter.Label(register_screen, text="").pack()
+        username_lable = Tkinter.Label(register_screen, text="Username * ")
+        username_lable.pack()
+        username_entry = Tkinter.Entry(register_screen, textvariable=username)
+        username_entry.pack()
+        password_lable = Tkinter.Label(register_screen, text="Password * ")
+        password_lable.pack()
+        password_entry = Tkinter.Entry(register_screen, textvariable=password, show='*')
+        password_entry.pack()
+        Tkinter.Label(register_screen, text="").pack()
+        Tkinter.Button(register_screen, text="Register", width=10, height=1, bg="blue", command = lambda: self.register_user(username.get(),password.get())).pack()
+
+    def register_user(self,username,password):
+        print username
+        print password
+        
     def CreateTheControllBoared(self):
         #setting the title
         self.root.title("Music Party Controller")
@@ -218,6 +246,7 @@ class Server():
         timeChangeB = Tkinter.Button(self.root, text ="Backward", command = lambda: self.changeSongTime(False,e),bg="white",font = helv2)
         timeReset = Tkinter.Button(self.root, text ="Restart The Song", command = lambda: self.changeSongTime(None,e),bg="white",font = helv2)
         changeSong = Tkinter.Button(self.root, text ="Choose song", command = lambda: self.chooseNewSong(playOrStop),bg="white",font = helv36)
+        register = Tkinter.Button(self.root, text ="Register", command = lambda: self.registerationPage(),bg="white",font = helv2)
 
         #setting the size of all the objects
         playOrStop.config(height=3, width = 20)
@@ -225,6 +254,7 @@ class Server():
         timeReset.config(height=3, width = 20)
         timeChangeB.config(height=3, width = 20)
         timeChangeF.config(height=3, width = 20)
+        register.config(height=3, width = 20)
     
         #placing everything
         changeSong.place(x=308, y=80)
@@ -235,7 +265,8 @@ class Server():
         timeChangeF.place(x=485, y=260)
         self.currentSongDisplay.place(x=0,y=0)
         self.TimeLeft.place(x=0,y=30)
-        
+        register.place(x=315, y=380)
+ 
 if __name__ == "__main__":
     music_party = Server() 
     music_party.main() #start everything
