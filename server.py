@@ -272,10 +272,13 @@ class Server():
         if username in b.keys():
             self.msg.config(text="The username " + username + " already exists")
         else:
-            b[username] = password
-            self.msg.config(text="Username " + username + " was created succesfully")
-            with open("DataBase.txt", 'wb') as data_base:
-                pickle.dump(b, data_base, protocol=pickle.HIGHEST_PROTOCOL)
+            if not username.isspace() and not password.isspace() and username!="" and password!="":
+                b[username] = password
+                self.msg.config(text="Username " + username + " was created succesfully")
+                with open("DataBase.txt", 'wb') as data_base:
+                    pickle.dump(b, data_base, protocol=pickle.HIGHEST_PROTOCOL)
+            else:
+                self.msg.config(text="You can't leave any tab empty")
                 
         self.username_entry.delete(0, 'end')
         self.password_entry.delete(0, 'end')
