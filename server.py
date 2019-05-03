@@ -119,7 +119,7 @@ class Server():
         while self.keepGoing:
             try:
                 sleep(0.5)
-                if self.file!=None and not self.stop:
+                if self.file!=None:
                     #taking only the song name
                     name = self.song.split(".wav")[0]
                     self.currentSongDisplay.config(text=str(name.upper()))#showing the song name on the screen
@@ -175,9 +175,12 @@ class Server():
             self.root.destroy() #close the gui
             
     def CheckIfNumber(self, P): #check if what pressed on the keybored is number
-        if str.isdigit(P) or P == "":
-            return True
-        else:
+        try:
+            if str.isdigit(P) or P=="":
+                return True
+            else:
+                return False
+        except:
             return False
         
     def res(self):
@@ -200,15 +203,16 @@ class Server():
             Tkinter.Label(self.register_screen, text="").pack()
             username_lable = Tkinter.Label(self.register_screen, text="Username * ")
             username_lable.pack()
-            username_entry = Tkinter.Entry(self.register_screen, textvariable=username)
-            username_entry.pack()
+            self.username_entry = Tkinter.Entry(self.register_screen, textvariable=username)
+            self.username_entry.pack()
             password_lable = Tkinter.Label(self.register_screen, text="Password * ")
             password_lable.pack()
-            password_entry = Tkinter.Entry(self.register_screen, textvariable=password, show='*')
-            password_entry.pack()
+            self.password_entry = Tkinter.Entry(self.register_screen, textvariable=password, show='*')
+            self.password_entry.pack()
             Tkinter.Label(self.register_screen, text="").pack()
             Tkinter.Button(self.register_screen, text="Register", width=10, height=1, bg="grey", command = lambda: self.register_user(username.get(),password.get())).pack()
-
+            self.username_entry.focus_set()
+            
     def register_user(self,username,password):
         try:
             with open('DataBase.txt', 'rb') as data_base:
@@ -219,13 +223,16 @@ class Server():
             with open('DataBase.txt', 'rb') as data_base:
                 b = pickle.load(data_base)
         if username in b.keys():
-            self.msg.config(text="The username " + username + " is already exist")
+            self.msg.config(text="The username " + username + " already exists")
         else:
             b[username] = password
             self.msg.config(text="Username " + username + " was created succesfully")
             with open("DataBase.txt", 'wb') as data_base:
                 pickle.dump(b, data_base, protocol=pickle.HIGHEST_PROTOCOL)
-            
+                
+        self.username_entry.delete(0, 'end')
+        self.password_entry.delete(0, 'end')
+        self.username_entry.focus_set()
         data_base.close()
         
     def CreateTheControllBoared(self):
