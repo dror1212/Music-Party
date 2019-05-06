@@ -16,7 +16,7 @@ class Server():
 
         #creating my socket to connect with others
         self.server=socket.socket()
-        self.server.bind(('0.0.0.0',3339))
+        self.server.bind(('0.0.0.0',3349))
         self.server.listen(10)
 
         #to save the info about my clients
@@ -44,6 +44,8 @@ class Server():
         self.stop = False #stop or play the song
         #placing and creating the gui
         self.CreateTheControllBoared()
+
+        self.rand = True
         
     def main(self):
         #thread for repeatetly acceptong new connections
@@ -95,7 +97,11 @@ class Server():
                     except:
                         print "sorry, there is a problem 2"
                 elif not self.stop and len(self.clients)>0: #play random song if no song has been chosen
-                    self.chooseRandomSong() #activate random song if no song is being played
+                    if self.rand:
+                        self.chooseRandomSong() #activate random song if no song is being played
+                    else:
+                        self.chooseNextSong()
+                        
 
         if self.file!=None:
             self.file.close()
@@ -113,7 +119,10 @@ class Server():
                 if ".wav" in temp:
                     maybeSong=temp
             self.newS = "songs\\"+maybeSong #save the path to the song
-                
+
+    def chooseNextSong(self):
+        self.otherSong(True)
+        
     def newConnection(self): #while the app is working wait for new clients to join and add them
         while self.keepGoing:
             (clientSocket,clientAddress)=self.server.accept()
@@ -178,6 +187,13 @@ class Server():
         else:
             b.config(text="Play",bg="lawn green")
         self.stop = not self.stop
+
+    def randOrNot(self,b): #stop/play the song when the button is being pressed
+        if self.rand:
+            b.config(text="Random",bg="tomato2")
+        else:
+            b.config(text="Next",bg="sienna1")
+        self.rand = not self.rand
         
 
     def otherSong(self,mode):
@@ -326,6 +342,7 @@ class Server():
         playOrStop = Tkinter.Button(self.root, text ="Stop", command = lambda: self.changeStatus(playOrStop),bg="red3",font = helv2)        
         #timeChangeF = Tkinter.Button(self.root, text ="Forward", command = lambda: self.changeSongTime(True,e),bg="white",font = helv2)
         #timeChangeB = Tkinter.Button(self.root, text ="Backward", command = lambda: self.changeSongTime(False,e),bg="white",font = helv2)
+        randOrNext = Tkinter.Button(self.root, text ="Next", command = lambda: self.randOrNot(randOrNext),bg="sienna1",font = helv2)        
 
         nextSong = Tkinter.Button(self.root, text ="Forward", command = lambda: self.otherSong(True),bg="white",font = helv2)
         previosSong = Tkinter.Button(self.root, text ="Backward", command = lambda: self.otherSong(False),bg="white",font = helv2)
@@ -335,19 +352,21 @@ class Server():
         register = Tkinter.Button(self.root, text ="Register", command = lambda: self.registerationPage(),bg="white",font = helv2)
 
         #setting the size of all the objects
-        playOrStop.config(height=3, width = 20)
-        changeSong.config(height=2 , width = 15)
-        timeReset.config(height=3, width = 20)
-        #timeChangeB.config(height=3, width = 20)
-        #timeChangeF.config(height=3, width = 20)
-        nextSong.config(height=3, width = 20)
-        previosSong.config(height=3, width = 20)
-        register.config(height=3, width = 20)
+        playOrStop.config(height=3, width = 20,relief=Tkinter.GROOVE)
+        randOrNext.config(height=1, width = 8,relief=Tkinter.GROOVE)
+        changeSong.config(height=2 , width = 15,relief=Tkinter.GROOVE)
+        timeReset.config(height=3, width = 20,relief=Tkinter.GROOVE)
+        #timeChangeB.config(height=3, width = 20,relief=Tkinter.GROOVE)
+        #timeChangeF.config(height=3, width = 20,relief=Tkinter.GROOVE)
+        nextSong.config(height=3, width = 20,relief=Tkinter.GROOVE)
+        previosSong.config(height=3, width = 20,relief=Tkinter.GROOVE)
+        register.config(height=3, width = 20,relief=Tkinter.GROOVE)
     
         #placing everything
         changeSong.place(x=308, y=80)
         #e.place(x=187, y=180)
         playOrStop.place(x=315, y=320)
+        randOrNext.place(x=362,y=150)
         timeReset.place(x=315, y=260)
         #timeChangeB.place(x=145, y=260)
         #timeChangeF.place(x=485, y=260)
