@@ -10,6 +10,7 @@ import os
 import random
 import tkFont
 import pickle
+import md5
 
 class Server():
     def __init__(self):
@@ -205,7 +206,7 @@ class Server():
                     name = x[0]
                     password = x[-1]
                     if name in b.keys():
-                        if b[name]==password:
+                        if b[name]==md5.new(password).hexdigest():
                             self.clients[client]=True
                             client.send("Connection accepted")
                         else:
@@ -323,7 +324,8 @@ class Server():
             self.msg.config(text="The username " + username + " already exists")
         else:
             if not username.isspace() and not password.isspace() and username!="" and password!="":
-                b[username] = password
+                b[username] = md5.new(password).hexdigest()
+                print b[username]
                 self.msg.config(text="Username " + username + " was created succesfully")
                 with open("DataBase.txt", 'wb') as data_base:
                     pickle.dump(b, data_base, protocol=pickle.HIGHEST_PROTOCOL)
