@@ -16,11 +16,11 @@ class Server():
 
         #creating my socket to connect with others
         self.server=socket.socket()
-        self.server.bind(('0.0.0.0',3349))
+        self.server.bind(('0.0.0.0',3339))
         self.server.listen(10)
 
         #to save the info about my clients
-        self.clients=[]
+        self.clients={}
         self.clientsAdresess = []
 
         #thread for repeatetly acceptong new connections
@@ -79,16 +79,17 @@ class Server():
                         self.newS = None
                     except:
                         print "sorry, there is a problem"
-            if len(self.clients)>0: #if there is someone connected
+            if True in self.clients.values(): #if there is someone connected
                 if l and self.file.tell()<=self.file.getnframes(): #if thre is info and the song is not over
                     try:                        
                         if not self.stop: #if the song is not on stop mode
                             l=self.file.readframes(32) #read from the song file
                             temp = self.clients #to prevent problems
                             counter = 0
-                            for clientSocket in temp: #send to all the clients the music
+                            for clientSocket in temp.keys(): #send to all the clients the music
                                 try:
-                                    clientSocket.send(l)
+                                    if temp[clientSocket]:
+                                        clientSocket.send(l)
                                 except: #if one of the clients is not connected anymore delete it
                                     print "good bye " + str(self.clientsAdresess[counter])
                                     del self.clients[counter]
@@ -126,8 +127,10 @@ class Server():
     def newConnection(self): #while the app is working wait for new clients to join and add them
         while self.keepGoing:
             (clientSocket,clientAddress)=self.server.accept()
-            self.clients.append(clientSocket)
-            self.clientsAdresess.append(clientAddress)            
+            self.clients[clientSocket] = False
+            self.clientsAdresess.append(clientAddress)
+            self.listen = Thread(target = self.listen_to_clients, args = (clientSocket,))
+            self.listen.start()
             print "welcome " + str(clientAddress) + "\n"
          
     def updateData(self): #updating the data on the screen
@@ -141,7 +144,7 @@ class Server():
                     self.currentSongDisplay.config(text=str(name.upper()))#showing the song name on the screen
 
                     try:
-                        self.timew.configure(to = self.file.getnframes()/self.file.getframerate())
+                        self.timew.configure(to = self.file.getnframes()/self.file.getframerate(),tickinterval=self.file.getnframes()/self.file.getframerate())
                     except:
                         pass
                     try:
@@ -180,7 +183,32 @@ class Server():
     def setPlayStatus(self,b): #when choosing new song put on playing mode
         b.config(text="Stop",bg="red3")
         self.stop = False
-    
+
+    def listen_to_clients(self,client):
+        try:
+            with open('DataBase.txt', 'rb') as data_base:
+                b = pickle.load(data_base)
+        except:
+            with open("DataBase.txt", 'wb') as data_base:
+                pickle.dump({}, data_base, protocol=pickle.HIGHEST_PROTOCOL)
+            with open('DataBase.txt', 'rb') as data_base:
+                b = pickle.load(data_base)
+        while True:
+            try:
+                x = client.recv(32)
+                if "Connection:" in x:                    
+                    with open('DataBase.txt', 'rb') as data_base:
+                        b = pickle.load(data_base)
+                    x = x.split(":")
+                    x = x[-1].split(",")                    
+                    name = x[0]
+                    password = x[-1]
+                    if name in b.keys():
+                        if b[name]==password:
+                            self.clients[client]=True
+            except:
+                break
+
     def changeStatus(self,b): #stop/play the song when the button is being pressed
         if self.stop:
             b.config(text="Stop",bg="red3")
@@ -377,5 +405,5 @@ class Server():
         register.place(x=315, y=380)
 
         self.timew = Tkinter.Scale(self.root, from_=0, to=0,tickinterval=10, orient=Tkinter.HORIZONTAL)
-        self.timew.config(length = 600,width=30, fg = "white", bg = "black")
+        self.timew.config(length = 600,width=20, fg = "white", bg = "black")
         self.timew.place(x = 97, y = 180)
