@@ -1,6 +1,7 @@
 import socket
 import time
 import pyaudio
+import Tkinter
 
 FORMAT=pyaudio.paInt16
 FSAMP = 88800
@@ -14,13 +15,21 @@ stream = p.open(format=FORMAT,
                 output=True)
 
 stream.start_stream()
-clientSocket.send("Connection:dror,1234")
+while True:
+    x = raw_input("what is your username?")
+    y = raw_input("what is your password?")
+    clientSocket.send("Connection:" + x + "," + y)
+    l = clientSocket.recv(32)
+    if l=="Connection accepted":
+        break
+    if l == "Wrong password":
+        print "Wrong password"
+    if l == "This username does not exist":
+        print "This username does not exist"
 l = clientSocket.recv(32)
-frames=[]
 while(l):
     if l == "ServerSentToClient":
         break
-    frames.append(l)
     try:
         stream.write(l)
     except:

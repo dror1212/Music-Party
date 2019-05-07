@@ -92,7 +92,7 @@ class Server():
                                         clientSocket.send(l)
                                 except: #if one of the clients is not connected anymore delete it
                                     print "good bye " + str(self.clientsAdresess[counter])
-                                    del self.clients[counter]
+                                    del self.clients[clientSocket]
                                     del self.clientsAdresess[counter]
                                 counter = counter+1
                     except:
@@ -196,6 +196,7 @@ class Server():
         while True:
             try:
                 x = client.recv(32)
+                print x
                 if "Connection:" in x:                    
                     with open('DataBase.txt', 'rb') as data_base:
                         b = pickle.load(data_base)
@@ -206,6 +207,11 @@ class Server():
                     if name in b.keys():
                         if b[name]==password:
                             self.clients[client]=True
+                            client.send("Connection accepted")
+                        else:
+                            client.send("Wrong password")
+                    else:
+                        client.send("This username does not exist")
             except:
                 break
 
