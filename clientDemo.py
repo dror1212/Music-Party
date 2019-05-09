@@ -4,6 +4,7 @@ import pyaudio
 import Tkinter
 from threading import Thread
 from time import sleep
+import os
 
 class Client():
     def __init__(self):
@@ -45,7 +46,7 @@ class Client():
                 self.password = None
             self.music()
         except:
-            pass
+            os._exit(1)
 
     def music(self):
         self.stream.start_stream()
@@ -66,6 +67,7 @@ class Client():
             pass
         stream.stop_stream()
         stream.close()
+        os._exit(1)
 
     def loginPage(self):
         self.login_screen.title("Login")
