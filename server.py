@@ -17,13 +17,12 @@ class Server():
 
         #creating my socket to connect with others
         self.server=socket.socket()
-        self.server.bind(('0.0.0.0',3339))
+        self.server.bind(('0.0.0.0',3539))
         self.server.listen(10)
 
         #to save the info about my clients
         self.clients={}
         self.clientsAdresess = []
-
         #thread for repeatetly acceptong new connections
         self.new = Thread(target = self.newConnection)
         #thread for sending the data
@@ -175,7 +174,7 @@ class Server():
         temp = 9999
         temp = fb.askopenfilename(initialdir=os.getcwd()+"\\songs",title = "Select file",filetypes=[("Wave files", "*.wav")])
         while temp==9999:
-            pass
+            time.sleep(0.1)
         self.newS = temp
         if self.newS!="" and self.newS!=" ":
             self.currentSong = os.listdir(os.getcwd()+"\\songs").index(self.newS.split("/")[-1])
@@ -345,7 +344,7 @@ class Server():
         self.root.wm_iconbitmap('pictures\\head.ico')
 
         #setting the background color
-        self.root.config(bg="DarkOrange3")
+        #self.root.config(bg="DarkOrange3")
 
         #setting the size of the controller
         self.root.geometry("800x550")
