@@ -141,8 +141,11 @@ class Server():
                 if self.file!=None:
                     #taking only the song name
                     name = self.song.split(".wav")[0]
-                    self.currentSongDisplay.config(text=str(name.upper()))#showing the song name on the screen
-
+                    try:
+                        self.currentSongDisplay.config(text=str(name.upper()))#showing the song name on the screen
+                        self.currentSongDisplay.place(x=(800-self.currentSongDisplay.winfo_width())/2,y=5)
+                    except:
+                        pass
                     try:
                         self.timew.configure(to = self.file.getnframes()/self.file.getframerate(),tickinterval=self.file.getnframes()/self.file.getframerate())
                     except:
@@ -156,17 +159,17 @@ class Server():
                     except:
                         pass
                     
-                    time = (self.file.getnframes() - self.file.tell())/self.file.getframerate()
-                    minutes = time /60
-                    seconds = time % 60
-                    if seconds<10:
-                        seconds = "0" + str(seconds)
-                    if minutes<10:
-                        minutes = "0" + str(minutes)
-                    time = str(minutes) + ":" + str(seconds)
-                    self.TimeLeft.configure(text=time) #showing how much time is left fot the song
-                else:
-                    self.TimeLeft.configure(text="0")
+                    #time = (self.file.getnframes() - self.file.tell())/self.file.getframerate()
+                    #minutes = time /60
+                    #seconds = time % 60
+                    #if seconds<10:
+                        #seconds = "0" + str(seconds)
+                    #if minutes<10:
+                        #minutes = "0" + str(minutes)
+                    #time = str(minutes) + ":" + str(seconds)
+                    #self.TimeLeft.configure(text=time) #showing how much time is left fot the song
+                #else:
+                    #self.TimeLeft.configure(text="0")
             except:
                 print "I want to know"
 
@@ -371,8 +374,8 @@ class Server():
         #e = Tkinter.Entry(self.root,font=large_font,justify='center', validate='all', validatecommand=(vcmd, '%P'))
 
         #Text for showing the current song
-        self.currentSongDisplay = Tkinter.Label(self.root,text="No song",font="Times 20",fg="white",bg="black")
-        self.TimeLeft = Tkinter.Label(self.root,text="0",font="Times 20",fg="white",bg="black")        
+        self.currentSongDisplay = Tkinter.Label(self.root,text="No song",font="Arial 24 bold",fg="white",bg="black")
+        #self.TimeLeft = Tkinter.Label(self.root,text="0",font="Times 20",fg="white",bg="black")        
         #creating the buttons
         playOrStop = Tkinter.Button(self.root, text ="Stop", command = lambda: self.changeStatus(playOrStop),bg="red3",font = helv2)        
         #timeChangeF = Tkinter.Button(self.root, text ="Forward", command = lambda: self.changeSongTime(True,e),bg="white",font = helv2)
@@ -408,7 +411,7 @@ class Server():
         previosSong.place(x=145, y=260)
         nextSong.place(x=485, y=260)
         self.currentSongDisplay.place(x=0,y=0)
-        self.TimeLeft.place(x=0,y=30)
+        #self.TimeLeft.place(x=0,y=30)
         register.place(x=315, y=380)
 
         self.timew = Tkinter.Scale(self.root, from_=0, to=0,tickinterval=10, orient=Tkinter.HORIZONTAL)
