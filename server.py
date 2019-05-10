@@ -244,8 +244,8 @@ class Server():
                 self.currentSong-=1
                 s = temp[self.currentSong]
             else:
-                s = temp[0]
-                self.currentSong=0
+                s = temp[-1]
+                self.currentSong=len(temp)-1
                 
         if ".wav" in s:
             self.newS = "songs\\"+s #save the path to the song
