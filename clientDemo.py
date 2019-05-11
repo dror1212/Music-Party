@@ -19,24 +19,26 @@ class Client():
                             channels=1,
                             rate=self.FSAMP,
                             output=True)
-        self.music_control = Thread(target = self.start)
+        self.quit = Thread(target = self.do)
         self.password = None
         self.username = None
         self.loginPage()
         
     def main(self):
-        self.music_control.start()
-        self.login_screen.mainloop()
+        self.start()
         
     def start(self):
         try:
             while True:
                 while self.username == None or self.password == None:
+                    self.login_screen.update_idletasks()
+                    self.login_screen.update()
                     sleep(0.1)
                 self.clientSocket.send("Connection:" + self.username + "," + self.password)
                 l = self.clientSocket.recv(32)
                 if l=="Connection accepted":
                     self.msg.configure(text = "Connection accepted")
+                    self.login_screen.destroy()
                     break
                 if l == "Wrong password":
                     self.msg.configure(text = "Wrong password")
@@ -48,7 +50,19 @@ class Client():
         except:
             os._exit(1)
 
+    def do(self):
+        self.login_screen = Tkinter.Tk()
+        self.close()
+        while True:
+            try:
+                self.login_screen.update_idletasks()
+                self.login_screen.update()
+                sleep(0.1)
+            except:
+                break
+    
     def music(self):
+        self.quit.start()
         self.stream.start_stream()
         try:
             l = self.clientSocket.recv(32)
@@ -69,6 +83,17 @@ class Client():
         stream.close()
         os._exit(1)
 
+    def close(self):
+        self.login_screen.title("Enjoy")
+        self.login_screen.geometry("300x250")
+        self.login_screen.wm_iconbitmap('pictures\\head.ico')
+        self.login_screen.resizable(0, 0)
+        self.login_screen.protocol("WM_DELETE_WINDOW", self.disconnect)
+        
+    def disconnect(self):
+        self.login_screen.destroy()
+        self.clientSocket.send("Disconnect:")
+        
     def loginPage(self):
         self.login_screen.title("Login")
         self.login_screen.geometry("300x250")

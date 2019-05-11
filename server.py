@@ -197,7 +197,7 @@ class Server():
             with open('DataBase.txt', 'rb') as data_base:
                 b = pickle.load(data_base)
         while True:
-            try:
+            #try:
                 x = client.recv(32)
                 print x
                 if "Connection:" in x:                    
@@ -215,8 +215,19 @@ class Server():
                             client.send("Wrong password")
                     else:
                         client.send("This username does not exist")
-            except:
-                break
+                elif "Disconnect:" == x:
+                    i = 0
+                    for c in self.clients.keys():
+                        if c==client:
+                            break
+                        i +=1
+                    print "good bye " + str(self.clientsAdresess[i])
+                    del self.clientsAdresess[i]
+                    del self.clients[client]
+                    break
+                    
+            #except:
+                #break
 
     def changeStatus(self,b): #stop/play the song when the button is being pressed
         if self.stop:
