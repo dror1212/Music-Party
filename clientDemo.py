@@ -85,11 +85,11 @@ class Client():
 
     def close(self):
         self.login_screen.title("Enjoy")
-        self.login_screen.geometry("300x250")
+        self.login_screen.geometry("150x100")
         self.login_screen.wm_iconbitmap('pictures\\head.ico')
         self.login_screen.resizable(0, 0)
         self.login_screen.protocol("WM_DELETE_WINDOW", self.disconnect)
-        
+        Tkinter.Button(self.login_screen, text="Quit", width=150, height=100, bg="red3",font="Arial 24 bold", command = self.disconnect).pack()
     def disconnect(self):
         self.login_screen.destroy()
         self.clientSocket.send("Disconnect:")
