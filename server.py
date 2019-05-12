@@ -57,8 +57,16 @@ class Server():
         self.update.start()
         
         #needed to make the GUI work properly
-        self.root.mainloop()
+        self.do()
         
+    def do(self):
+        while self.keepGoing:
+            try:
+                self.root.update_idletasks()
+                self.root.update()
+            except:
+                break
+            
     def musicSender(self):
         l = 0 #false
         while self.keepGoing: #if the gui is still open
