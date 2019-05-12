@@ -22,6 +22,7 @@ class Client():
         self.quit = Thread(target = self.do)
         self.password = None
         self.username = None
+        self.my_name = ""
         self.loginPage()
         
     def main(self):
@@ -36,14 +37,18 @@ class Client():
                     sleep(0.1)
                 self.clientSocket.send("Connection:" + self.username + "," + self.password)
                 l = self.clientSocket.recv(32)
-                if l=="Connection accepted":
+                print l
+                if l == "Connection accepted":
                     self.msg.configure(text = "Connection accepted")
                     self.login_screen.destroy()
+                    self.my_name = self.username
                     break
-                if l == "Wrong password":
+                elif l == "Wrong password":
                     self.msg.configure(text = "Wrong password")
-                if l == "This username does not exist":
+                elif l == "This username does not exist":
                     self.msg.configure(text = "This username does not exist")
+                elif l == "This user is taken":
+                    self.msg.configure(text ="This user is taken")
                 self.username = None
                 self.password = None
             self.music()
@@ -92,7 +97,7 @@ class Client():
         Tkinter.Button(self.login_screen, text="Quit", width=150, height=100, bg="red3",font="Arial 24 bold", command = self.disconnect).pack()
     def disconnect(self):
         self.login_screen.destroy()
-        self.clientSocket.send("Disconnect:")
+        self.clientSocket.send("Disconnect:"+str(self.my_name))
         
     def loginPage(self):
         self.login_screen.title("Login")

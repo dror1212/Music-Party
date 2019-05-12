@@ -21,7 +21,8 @@ class Server():
         self.server.listen(10)
 
         #to save the info about my clients
-        self.clients={}
+        self.clients = {}
+        self.names = {}
         self.clientsAdresess = []
         #thread for repeatetly acceptong new connections
         self.new = Thread(target = self.newConnection)
@@ -101,6 +102,7 @@ class Server():
                                 except: #if one of the clients is not connected anymore delete it
                                     print "good bye " + str(self.clientsAdresess[counter])
                                     del self.clients[clientSocket]
+                                    del self.names[clientSocket]
                                     del self.clientsAdresess[counter]
                                 counter = counter+1
                     except:
@@ -137,6 +139,7 @@ class Server():
             (clientSocket,clientAddress)=self.server.accept()
             self.clients[clientSocket] = False
             self.clientsAdresess.append(clientAddress)
+            self.names[clientSocket]= None
             self.listen = Thread(target = self.listen_to_clients, args = (clientSocket,))
             self.listen.start()
             print "welcome " + str(clientAddress) + "\n"
@@ -205,7 +208,7 @@ class Server():
             with open('DataBase.txt', 'rb') as data_base:
                 b = pickle.load(data_base)
         while True:
-            #try:
+            try:
                 x = client.recv(32)
                 print x
                 if "Connection:" in x:                    
@@ -216,14 +219,17 @@ class Server():
                     name = x[0]
                     password = x[-1]
                     if name in b.keys():
-                        if b[name]==md5.new(password).hexdigest():
+                        if name in self.names.values():
+                            client.send("This user is taken")
+                        elif b[name]==md5.new(password).hexdigest():
                             self.clients[client]=True
+                            self.names[client]=name
                             client.send("Connection accepted")
                         else:
                             client.send("Wrong password")
                     else:
                         client.send("This username does not exist")
-                elif "Disconnect:" == x:
+                elif "Disconnect:" in x:
                     i = 0
                     for c in self.clients.keys():
                         if c==client:
@@ -232,10 +238,11 @@ class Server():
                     print "good bye " + str(self.clientsAdresess[i])
                     del self.clientsAdresess[i]
                     del self.clients[client]
+                    del self.names[client]
                     break
                     
-            #except:
-                #break
+            except:
+                break
 
     def changeStatus(self,b): #stop/play the song when the button is being pressed
         if self.stop:
