@@ -26,13 +26,15 @@ namespace music
             SetContentView(Resource.Layout.activity_main);
             btnSend = FindViewById<Button>(Resource.Id.btnSend);
             edt1 = FindViewById<EditText>(Resource.Id.edt1);
-            player = new AudioTrack(global::Android.Media.Stream.Music, 88000, ChannelOut.Mono, Android.Media.Encoding.Pcm16bit,32,AudioTrackMode.Stream);
+#pragma warning disable CS0618 // Type or member is obsolete
+            player = new AudioTrack(Stream.Music, 8000, ChannelOut.Mono, Android.Media.Encoding.Pcm16bit,32,AudioTrackMode.Stream);
+#pragma warning restore CS0618 // Type or member is obsolete
             btnSend.Click += BtnSend_Click;
         }
 
         private void BtnSend_Click(object sender, System.EventArgs e)
         {
-            client = new TcpClient("192.168.1.105", 3334);
+            client = new TcpClient("10.30.56.51", 3334);
             clientReceive();
         }
 
@@ -43,7 +45,6 @@ namespace music
                 stream = client.GetStream(); //Gets The Stream of The Connection
                 //byte[] x = System.Text.Encoding.ASCII.GetBytes("Connection:d,1");
                 //stream.Write(x, 0, x.Length);
-                player.Play();
                 new Thread(() => // Thread (like Timer)
                 {
                     while (true)//Keeps Trying to Receive the Size of the Message or Data
@@ -51,7 +52,7 @@ namespace music
                         byte[] datalength = new byte[32];
                         if ((stream.Read(datalength, 0, 32)) != 0)
                         {
-                            this.RunOnUiThread(() => PlaySound(datalength));
+                            PlaySound(datalength);
                         }
                     }
                 }).Start(); // Start the Thread
@@ -65,6 +66,7 @@ namespace music
         private void PlaySound(byte[] data)
         {
             player.Write(data, 0, 32);
+            player.Play();
         }
     }
 }
