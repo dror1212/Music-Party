@@ -14,7 +14,7 @@ class Client():
         self.FRAME_SIZE = 32
         self.p = pyaudio.PyAudio()
         self.clientSocket=socket.socket()
-        self.clientSocket.connect(("10.30.56.57",3539))
+        self.clientSocket.connect(("10.30.57.145",3539))
         self.stream = self.p.open(format=self.FORMAT,
                             channels=1,
                             rate=self.FSAMP,

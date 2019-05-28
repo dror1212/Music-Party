@@ -15,4 +15,9 @@
         android:layout_height="wrap_content"
         android:text="Send"
         android:id="@+id/edt1" />
+    <Button
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="Send"
+        android:id="@+id/btnSend1" />
 </LinearLayout>
