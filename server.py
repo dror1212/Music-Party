@@ -128,7 +128,7 @@ class Server():
             self.server.clients[clientSocket] = False
             self.server.clientsAdresess.append(clientAddress)
             self.server.names[clientSocket]= None
-            self.listen = Thread(target = self.listen_to_clients, args = (clientSocket,))
+            self.listen = Thread(target = self.server.listen_to_clients, args = (clientSocket,self.data,))
             self.listen.start()
             print "welcome " + str(clientAddress) + "\n"
          
@@ -157,18 +157,6 @@ class Server():
                             self.timew.set(self.file.tell()/self.file.getframerate())
                     except:
                         pass
-                    
-                    #time = (self.file.getnframes() - self.file.tell())/self.file.getframerate()
-                    #minutes = time /60
-                    #seconds = time % 60
-                    #if seconds<10:
-                        #seconds = "0" + str(seconds)
-                    #if minutes<10:
-                        #minutes = "0" + str(minutes)
-                    #time = str(minutes) + ":" + str(seconds)
-                    #self.TimeLeft.configure(text=time) #showing how much time is left fot the song
-                #else:
-                    #self.TimeLeft.configure(text="0")
             except:
                 print "I want to know"
 
@@ -185,33 +173,6 @@ class Server():
     def setPlayStatus(self,b): #when choosing new song put on playing mode
         b.config(text="Stop",bg="red3")
         self.stop = False
-
-    def listen_to_clients(self,client):
-        while True:
-            try:
-                x = client.recv(1024)
-                print x
-                if "Connection:" in x:
-                    x = x.split(":")
-                    x = x[-1].split(",")                    
-                    name = x[0]
-                    password = x[-1]
-                    m = self.data.check_login(name,password,self.server.names)
-                    if m == "Connection accepted":
-                        self.server.clients[client]=True
-                        self.server.names[client]=name
-                    client.send(m)
-                elif "Disconnect:" in x:
-                    i = 0
-                    for c in self.server.clients.keys():
-                        if c==client:
-                            break
-                        i +=1
-                    self.server.remove_user(client,i)
-                    break
-                    
-            except:
-                break
 
     def changeStatus(self,b): #stop/play the song when the button is being pressed
         if self.stop:
