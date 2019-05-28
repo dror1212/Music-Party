@@ -11,19 +11,16 @@ import random
 import tkFont
 import pickle
 import md5
+from connection import SocketManager
+from DataBase import DataBase
 
 class Server():
     def __init__(self):
 
         #creating my socket to connect with others
-        self.server=socket.socket()
-        self.server.bind(('0.0.0.0',3539))
-        self.server.listen(10)
+        self.server = SocketManager(3539)
 
-        #to save the info about my clients
-        self.clients = {}
-        self.names = {}
-        self.clientsAdresess = []
+        self.data = DataBase("DataBase.txt")
         #thread for repeatetly acceptong new connections
         self.new = Thread(target = self.newConnection)
         #thread for sending the data
@@ -50,6 +47,8 @@ class Server():
         
     def main(self):
         #thread for repeatetly acceptong new connections
+        self.data.create()
+        
         self.new.start()
         
         #thread for sending the data
@@ -88,26 +87,15 @@ class Server():
                         self.newS = None
                     except:
                         print "sorry, there is a problem"
-            if True in self.clients.values(): #if there is someone connected
+            if True in self.server.clients.values(): #if there is someone connected
                 if l and self.file.tell()<=self.file.getnframes(): #if thre is info and the song is not over
                     try:                        
                         if not self.stop: #if the song is not on stop mode
                             l=self.file.readframes(32) #read from the song file
-                            temp = self.clients #to prevent problems
-                            counter = 0
-                            for clientSocket in temp.keys(): #send to all the clients the music
-                                try:
-                                    if temp[clientSocket]:
-                                        clientSocket.send(l)
-                                except: #if one of the clients is not connected anymore delete it
-                                    print "good bye " + str(self.clientsAdresess[counter])
-                                    del self.clients[clientSocket]
-                                    del self.names[clientSocket]
-                                    del self.clientsAdresess[counter]
-                                counter = counter+1
+                            self.server.broadcast(l)
                     except:
                         print "sorry, there is a problem 2"
-                elif not self.stop and len(self.clients)>0: #play random song if no song has been chosen
+                elif not self.stop and len(self.server.clients)>0: #play random song if no song has been chosen
                     if self.rand:
                         self.chooseRandomSong() #activate random song if no song is being played
                     else:
@@ -116,7 +104,7 @@ class Server():
 
         if self.file!=None:
             self.file.close()
-        for clientSocket in self.clients: #disconnect from all the clients
+        for clientSocket in self.server.clients: #disconnect from all the clients
             clientSocket.send("ServerSentToClient")
             clientSocket.close()
 
@@ -137,9 +125,9 @@ class Server():
     def newConnection(self): #while the app is working wait for new clients to join and add them
         while self.keepGoing:
             (clientSocket,clientAddress)=self.server.accept()
-            self.clients[clientSocket] = False
-            self.clientsAdresess.append(clientAddress)
-            self.names[clientSocket]= None
+            self.server.clients[clientSocket] = False
+            self.server.clientsAdresess.append(clientAddress)
+            self.server.names[clientSocket]= None
             self.listen = Thread(target = self.listen_to_clients, args = (clientSocket,))
             self.listen.start()
             print "welcome " + str(clientAddress) + "\n"
@@ -199,46 +187,27 @@ class Server():
         self.stop = False
 
     def listen_to_clients(self,client):
-        try:
-            with open('DataBase.txt', 'rb') as data_base:
-                b = pickle.load(data_base)
-        except:
-            with open("DataBase.txt", 'wb') as data_base:
-                pickle.dump({}, data_base, protocol=pickle.HIGHEST_PROTOCOL)
-            with open('DataBase.txt', 'rb') as data_base:
-                b = pickle.load(data_base)
         while True:
             try:
-                x = client.recv(32)
+                x = client.recv(1024)
                 print x
-                if "Connection:" in x:                    
-                    with open('DataBase.txt', 'rb') as data_base:
-                        b = pickle.load(data_base)
+                if "Connection:" in x:
                     x = x.split(":")
                     x = x[-1].split(",")                    
                     name = x[0]
                     password = x[-1]
-                    if name in b.keys():
-                        if name in self.names.values():
-                            client.send("This user is taken")
-                        elif b[name]==md5.new(password).hexdigest():
-                            self.clients[client]=True
-                            self.names[client]=name
-                            client.send("Connection accepted")
-                        else:
-                            client.send("Wrong password")
-                    else:
-                        client.send("This username does not exist")
+                    m = self.data.check_login(name,password,self.server.names)
+                    if m == "Connection accepted":
+                        self.server.clients[client]=True
+                        self.server.names[client]=name
+                    client.send(m)
                 elif "Disconnect:" in x:
                     i = 0
-                    for c in self.clients.keys():
+                    for c in self.server.clients.keys():
                         if c==client:
                             break
                         i +=1
-                    print "good bye " + str(self.clientsAdresess[i])
-                    del self.clientsAdresess[i]
-                    del self.clients[client]
-                    del self.names[client]
+                    self.server.remove_user(client,i)
                     break
                     
             except:
@@ -340,30 +309,14 @@ class Server():
             self.username_entry.focus_set()
             
     def register_user(self,username,password):
-        try:
-            with open('DataBase.txt', 'rb') as data_base:
-                b = pickle.load(data_base)
-        except:
-            with open("DataBase.txt", 'wb') as data_base:
-                pickle.dump({}, data_base, protocol=pickle.HIGHEST_PROTOCOL)
-            with open('DataBase.txt', 'rb') as data_base:
-                b = pickle.load(data_base)
-        if username in b.keys():
-            self.msg.config(text="The username " + username + " already exists")
-        else:
-            if not username.isspace() and not password.isspace() and username!="" and password!="":
-                b[username] = md5.new(password).hexdigest()
-                print b[username]
-                self.msg.config(text="Username " + username + " was created succesfully")
-                with open("DataBase.txt", 'wb') as data_base:
-                    pickle.dump(b, data_base, protocol=pickle.HIGHEST_PROTOCOL)
-            else:
-                self.msg.config(text="You can't leave any tab empty")
+        b = self.data.get()
+
+        check = data.check_register(username,password)
+        self.msg.config(text=check)
                 
         self.username_entry.delete(0, 'end')
         self.password_entry.delete(0, 'end')
         self.username_entry.focus_set()
-        data_base.close()
         
     def CreateTheControllBoared(self):
         #setting the title

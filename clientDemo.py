@@ -36,7 +36,7 @@ class Client():
                     self.login_screen.update()
                     sleep(0.1)
                 self.clientSocket.send("Connection:" + self.username + "," + self.password)
-                l = self.clientSocket.recv(32)
+                l = self.clientSocket.recv(1024)
                 print l
                 if l == "Connection accepted":
                     self.msg.configure(text = "Connection accepted")
