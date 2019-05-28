@@ -137,11 +137,11 @@ class Server():
     def newConnection(self): #while the app is working wait for new clients to join and add them
         while self.keepGoing:
             (clientSocket,clientAddress)=self.server.accept()
-            self.clients[clientSocket] = False
+            self.clients[clientSocket] = True
             self.clientsAdresess.append(clientAddress)
             self.names[clientSocket]= None
-            self.listen = Thread(target = self.listen_to_clients, args = (clientSocket,))
-            self.listen.start()
+            #self.listen = Thread(target = self.listen_to_clients, args = (clientSocket,))
+            #self.listen.start()
             print "welcome " + str(clientAddress) + "\n"
          
     def updateData(self): #updating the data on the screen

@@ -14,7 +14,7 @@ class Client():
         self.FRAME_SIZE = 32
         self.p = pyaudio.PyAudio()
         self.clientSocket=socket.socket()
-        self.clientSocket.connect(('127.0.0.1',3539))
+        self.clientSocket.connect(("10.30.56.57",3539))
         self.stream = self.p.open(format=self.FORMAT,
                             channels=1,
                             rate=self.FSAMP,
@@ -29,19 +29,19 @@ class Client():
         self.start()
         
     def start(self):
-        try:
+        #try:
             while True:
-                while self.username == None or self.password == None:
+                while False:
                     self.login_screen.update_idletasks()
                     self.login_screen.update()
                     sleep(0.1)
-                self.clientSocket.send("Connection:" + self.username + "," + self.password)
-                l = self.clientSocket.recv(32)
-                print l
-                if l == "Connection accepted":
+                    self.clientSocket.send("Connection:" + self.username + "," + self.password)
+                l = True
+                if l == True:
                     self.msg.configure(text = "Connection accepted")
                     self.login_screen.destroy()
-                    self.my_name = self.username
+                    #self.my_name = self.username
+                    print "ggggg"
                     break
                 elif l == "Wrong password":
                     self.msg.configure(text = "Wrong password")
@@ -52,8 +52,8 @@ class Client():
                 self.username = None
                 self.password = None
             self.music()
-        except:
-            os._exit(1)
+        #except:
+            #os._exit(1)
 
     def do(self):
         self.login_screen = Tkinter.Tk()
@@ -67,6 +67,7 @@ class Client():
                 break
     
     def music(self):
+        print "vvvv"
         self.quit.start()
         self.stream.start_stream()
         try:
