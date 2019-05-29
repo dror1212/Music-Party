@@ -14,7 +14,14 @@ class Client():
         self.FRAME_SIZE = 32
         self.p = pyaudio.PyAudio()
         self.clientSocket=socket.socket()
-        self.clientSocket.connect(('127.0.0.1',3539))
+        while True:
+            self.ip = None
+            self.tryToConnect()
+            try:
+                self.clientSocket.connect((self.ip,3539))
+                break
+            except:
+                pass
         self.stream = self.p.open(format=self.FORMAT,
                             channels=1,
                             rate=self.FSAMP,
@@ -27,6 +34,28 @@ class Client():
         
     def main(self):
         self.start()
+
+    def tryToConnect(self):
+        self.login_screen.title("Login")
+        self.login_screen.geometry("300x250")
+        self.login_screen.wm_iconbitmap('pictures\\head.ico')
+        self.login_screen.resizable(0, 0)
+        ip = Tkinter.StringVar()
+        ip_lable = Tkinter.Label(self.login_screen, text="IP * ")
+        ip_lable.pack()
+        self.ip_entry = Tkinter.Entry(self.login_screen, textvariable=ip)
+        self.ip_entry.pack()
+        Tkinter.Button(self.login_screen, text="Connect", width=10, height=1, bg="grey", command = lambda: self.getIp(ip.get())).pack()
+        while self.ip==None:
+            self.login_screen.update_idletasks()
+            self.login_screen.update()
+            sleep(0.1)
+        self.login_screen.destroy()
+        self.login_screen = Tkinter.Tk()
+
+    def getIp(self,ip):
+        self.ip = ip       
+        self.ip_entry.delete(0, 'end')
         
     def start(self):
         try:

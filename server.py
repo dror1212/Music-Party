@@ -8,7 +8,7 @@ import tkFileDialog as fb
 import tkMessageBox
 import os
 import random
-import tkFont`1
+import tkFont
 import pickle
 import md5
 from connection import SocketManager
