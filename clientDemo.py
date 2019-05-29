@@ -8,13 +8,17 @@ import os
 
 class Client():
     def __init__(self):
-        self.login_screen = Tkinter.Tk()
+        self.login_screen = Tkinter.Tk() #create the tkinter base
+        
+        #constans for the stream
         self.FORMAT=pyaudio.paInt16
         self.FSAMP = 88800
         self.FRAME_SIZE = 32
+
         self.p = pyaudio.PyAudio()
         self.clientSocket=socket.socket()
-        while True:
+        
+        while True: #try to connect to ip untill it works
             self.ip = None
             self.tryToConnect()
             try:
@@ -36,6 +40,7 @@ class Client():
         self.start()
 
     def tryToConnect(self):
+        #create the tkinter page to get the ip
         self.login_screen.title("Login")
         self.login_screen.geometry("300x250")
         self.login_screen.wm_iconbitmap('pictures\\head.ico')
@@ -46,31 +51,41 @@ class Client():
         self.ip_entry = Tkinter.Entry(self.login_screen, textvariable=ip)
         self.ip_entry.pack()
         Tkinter.Button(self.login_screen, text="Connect", width=10, height=1, bg="grey", command = lambda: self.getIp(ip.get())).pack()
+
+        #wait uneill you get something
         while self.ip==None:
+            #make the gui work
             self.login_screen.update_idletasks()
             self.login_screen.update()
+
+            #don't overwork
             sleep(0.1)
+        #destroy the screen when not needed
         self.login_screen.destroy()
         self.login_screen = Tkinter.Tk()
 
-    def getIp(self,ip):
+    def getIp(self,ip): #update the ip
         self.ip = ip       
         self.ip_entry.delete(0, 'end')
         
     def start(self):
         try:
             while True:
+                #wait untill you got username and password
                 while self.username == None or self.password == None:
                     self.login_screen.update_idletasks()
                     self.login_screen.update()
                     sleep(0.1)
+                #send to the server the username and password
+
                 self.clientSocket.send("Connection:" + self.username + "," + self.password)
-                l = self.clientSocket.recv(1024)
+                #get login status from the server
+                l = self.clientSocket.recv(1024) 
                 print l
-                if l == "Connection accepted":
+                if l == "Connection accepted": #if connected
                     self.msg.configure(text = "Connection accepted")
                     self.login_screen.destroy()
-                    self.my_name = self.username
+                    self.my_name = self.username #save my name
                     break
                 elif l == "Wrong password":
                     self.msg.configure(text = "Wrong password")
@@ -80,11 +95,12 @@ class Client():
                     self.msg.configure(text ="This user is taken")
                 self.username = None
                 self.password = None
-            self.music()
+            self.music() #activate when out of the connection loop
         except:
             os._exit(1)
 
     def do(self):
+        #update the gui so it works
         self.login_screen = Tkinter.Tk()
         self.close()
         while True:
@@ -99,25 +115,27 @@ class Client():
         self.quit.start()
         self.stream.start_stream()
         try:
-            l = self.clientSocket.recv(32)
+            l = self.clientSocket.recv(32) #get the music from the server
             while(l):
                 if l == "ServerSentToClient":
                     break
                 try:
-                    self.stream.write(l)
+                    self.stream.write(l) #play the music
                 except:
+                    #create new stream if there is a problem
                     self.stream = self.p.open(format=self.FORMAT,
                                 channels=1,
                                 rate=self.FSAMP,
                                 output=True)
-                l = self.clientSocket.recv(32)
+                l = self.clientSocket.recv(32) #get the music from the server
         except:
             pass
         stream.stop_stream()
         stream.close()
-        os._exit(1)
+        os._exit(1) #close everything
 
     def close(self):
+        #the quit button
         self.login_screen.title("Enjoy")
         self.login_screen.geometry("150x100")
         self.login_screen.wm_iconbitmap('pictures\\head.ico')
@@ -126,10 +144,12 @@ class Client():
         Tkinter.Button(self.login_screen, text="Quit", width=150, height=100, bg="red3",font="Arial 24 bold", command = self.disconnect).pack()
 
     def disconnect(self):
+        #disconnect from the server
         self.login_screen.destroy()
         self.clientSocket.send("Disconnect:"+str(self.my_name))
         
     def loginPage(self):
+        #create the login page
         self.login_screen.title("Login")
         self.login_screen.geometry("300x250")
         self.login_screen.wm_iconbitmap('pictures\\head.ico')
@@ -153,6 +173,7 @@ class Client():
         self.username_entry.focus_set()
         
     def login(self,username,password):
+        #update the password and username when trying to login
         self.username = username
         self.password = password
         
