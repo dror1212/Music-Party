@@ -58,9 +58,9 @@ class Server():
         
         self.music.start()
 
-        self.update.start()
-        
         #needed to make the GUI work properly
+        self.update.start()
+
         self.do()
         
     def do(self):
@@ -78,7 +78,7 @@ class Server():
                 if self.file.tell()<=self.file.getnframes(): #if thre is info and the song is not over
                     try:
                         if not self.stop: #if the song is not on stop mode
-                            sleep(0.0009)
+                            #sleep(0.01)
                             l=self.file.readframes(32) #read from the song file
                             self.server.broadcast(l)
                     except:
