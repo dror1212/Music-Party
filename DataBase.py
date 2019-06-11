@@ -37,14 +37,14 @@ class DataBase():
 
     def check_register(self,username,password):
         b = self.get()
-        print b
+        
         if username in b.keys():
             return ("The username " + username + " already exists")
         else:
             if not username.isspace() and not password.isspace() and username!="" and password!="":
                 b[username] = md5.new(password).hexdigest()
                 print b[username]
-                self.set(b)
-                return ("Username " + username + " was created succesfully")               
+                return ("Username " + username + " was created succesfully")
+                self.data.set(b)
             else:
                 return ("You can't leave any tab empty")

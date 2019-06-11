@@ -18,7 +18,7 @@ class Server():
     def __init__(self):
 
         #creating my socket to connect with others
-        self.server = SocketManager(3540)
+        self.server = SocketManager(3539)
 
         self.data = DataBase("DataBase.txt")
         #thread for repeatetly acceptong new connections
@@ -262,7 +262,7 @@ class Server():
     def register_user(self,username,password):
         b = self.data.get()
 
-        check = self.data.check_register(username,password)
+        check = data.check_register(username,password)
         self.msg.config(text=check)
                 
         self.username_entry.delete(0, 'end')
