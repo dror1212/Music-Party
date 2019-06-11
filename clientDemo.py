@@ -22,7 +22,7 @@ class Client():
             self.ip = None
             self.tryToConnect()
             try:
-                self.clientSocket.connect((self.ip,3539))
+                self.clientSocket.connect((self.ip,3540))
                 break
             except:
                 pass
@@ -33,6 +33,9 @@ class Client():
         self.quit = Thread(target = self.do)
         self.password = None
         self.username = None
+
+        self.go = True
+        
         self.my_name = ""
         self.loginPage()
         
@@ -116,9 +119,7 @@ class Client():
         self.stream.start_stream()
         try:
             l = self.clientSocket.recv(32) #get the music from the server
-            while(l):
-                if l == "ServerSentToClient":
-                    break
+            while self.go:
                 try:
                     self.stream.write(l) #play the music
                 except:
@@ -130,6 +131,7 @@ class Client():
                 l = self.clientSocket.recv(32) #get the music from the server
         except:
             pass
+        self.clientSocket.close()
         stream.stop_stream()
         stream.close()
         os._exit(1) #close everything
@@ -147,6 +149,7 @@ class Client():
         #disconnect from the server
         self.login_screen.destroy()
         self.clientSocket.send("Disconnect:"+str(self.my_name))
+        self.go = False
         
     def loginPage(self):
         #create the login page

@@ -18,7 +18,7 @@ class Server():
     def __init__(self):
 
         #creating my socket to connect with others
-        self.server = SocketManager(3539)
+        self.server = SocketManager(3540)
 
         self.data = DataBase("DataBase.txt")
         #thread for repeatetly acceptong new connections
