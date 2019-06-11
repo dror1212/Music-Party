@@ -262,7 +262,7 @@ class Server():
     def register_user(self,username,password):
         b = self.data.get()
 
-        check = data.check_register(username,password)
+        check = self.data.check_register(username,password)
         self.msg.config(text=check)
                 
         self.username_entry.delete(0, 'end')
