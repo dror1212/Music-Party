@@ -18,7 +18,7 @@ class Server():
     def __init__(self):
 
         #creating my socket to connect with others
-        self.server = SocketManager(3539)
+        self.server = SocketManager(3540)
 
         self.data = DataBase("DataBase.txt")
         #thread for repeatetly acceptong new connections
@@ -26,13 +26,15 @@ class Server():
         #thread for sending the data
         self.music = Thread(target = self.musicSender)
 
+        self.change = Thread(target = self.musicChanger)
+
         self.update = Thread(target = self.updateData)
 
         #creating the base for the gui
         self.root = Tkinter.Tk()
         self.register_screen = None
 
-        self.currentSong = 0 ####################
+        self.currentSong = -1 ####################
         
         #info I need to use in all the code
         self.newS = None #saving the location for new songs
@@ -52,6 +54,8 @@ class Server():
         self.new.start()
         
         #thread for sending the data
+        self.change.start()
+        
         self.music.start()
 
         self.update.start()
@@ -70,13 +74,31 @@ class Server():
     def musicSender(self):
         l = 0 #false
         while self.keepGoing: #if the gui is still open
+            if True in self.server.clients.values() and self.file!=None: #if there is someone connected
+                if self.file.tell()<=self.file.getnframes(): #if thre is info and the song is not over
+                    try:
+                        if not self.stop: #if the song is not on stop mode
+                            sleep(0.0009)
+                            l=self.file.readframes(32) #read from the song file
+                            self.server.broadcast(l)
+                    except:
+                        print "sorry, there is a problem 2"    
+
+        if self.file!=None:
+            self.file.close()
+        for clientSocket in self.server.clients: #disconnect from all the clients
+            clientSocket.send("ServerSentToClient")
+            clientSocket.close()
+            
+    def musicChanger(self):
+        while self.keepGoing: #if the gui is still open
             if None!=self.newS: #if there is new song being asked
                 if self.newS!="": #to check it is not empty string
+                    print "rrr"
                     try:
                         if self.file!=None: #if its not the first song being played
                             self.file.close() #close the last song
                         self.file=wave.open(self.newS,'rb') #open the new song
-                        l=self.file.readframes(32) #read from the new song
 
                         #save the current song with the right syntax
                         temp = self.newS.split("\\")                        
@@ -87,27 +109,16 @@ class Server():
                         self.newS = None
                     except:
                         print "sorry, there is a problem"
-            if True in self.server.clients.values(): #if there is someone connected
-                if l and self.file.tell()<=self.file.getnframes(): #if thre is info and the song is not over
-                    try:                        
-                        if not self.stop: #if the song is not on stop mode
-                            l=self.file.readframes(32) #read from the song file
-                            self.server.broadcast(l)
-                    except:
-                        print "sorry, there is a problem 2"
-                elif not self.stop and len(self.server.clients)>0: #play random song if no song has been chosen
-                    if self.rand:
-                        self.chooseRandomSong() #activate random song if no song is being played
-                    else:
-                        self.chooseNextSong()
+            if True in self.server.clients.values():
+                if self.file!=None: #if there is someone connected
+                    if not self.stop and len(self.server.clients)>0 and self.file.tell()==self.file.getnframes(): #play random song if no song has been chosen
+                        if self.rand:
+                            self.chooseRandomSong() #activate random song if no song is being played
+                        else:
+                            self.chooseNextSong()
+                else:
+                    self.chooseNextSong()
                         
-
-        if self.file!=None:
-            self.file.close()
-        for clientSocket in self.server.clients: #disconnect from all the clients
-            clientSocket.send("ServerSentToClient")
-            clientSocket.close()
-
     def chooseRandomSong(self):
             maybeSong = self.song #make sure the random song is not the last one
             while self.song==maybeSong: #make sure the random song is not the last one
@@ -137,7 +148,7 @@ class Server():
         while self.keepGoing:
             try:
                 last = self.timew.get()
-                sleep(0.5)
+                sleep(0.1)
                 if self.file!=None:
                     #taking only the song name
                     name = self.song.split(".wav")[0]
@@ -262,7 +273,7 @@ class Server():
     def register_user(self,username,password):
         b = self.data.get()
 
-        check = data.check_register(username,password)
+        check = self.data.check_register(username,password)
         self.msg.config(text=check)
                 
         self.username_entry.delete(0, 'end')
