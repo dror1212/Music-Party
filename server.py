@@ -2,6 +2,7 @@ import socket
 import pyaudio
 import wave
 from time import sleep
+from time import time
 from threading import Thread
 import Tkinter
 import tkFileDialog as fb
@@ -24,7 +25,7 @@ class Server():
         #thread for repeatetly acceptong new connections
         self.new = Thread(target = self.newConnection)
         #thread for sending the data
-        self.music = Thread(target = self.musicSender)
+        self.music = Thread(target = self.musicSender2)
 
         self.change = Thread(target = self.musicChanger)
 
@@ -46,6 +47,8 @@ class Server():
         self.CreateTheControllBoared()
 
         self.rand = True
+
+        self.t = None
         
     def main(self):
         #thread for repeatetly acceptong new connections
@@ -70,7 +73,27 @@ class Server():
                 self.root.update()
             except:
                 break
-            
+    def musicSender2(self):
+        l = 0 #false
+        while self.keepGoing: #if the gui is still open
+            if True in self.server.clients.values() and self.file!=None: #if there is someone connected
+                if self.file.tell()<=self.file.getnframes(): #if thre is info and the song is not over
+                    try:
+                        if not self.stop: #if the song is not on stop mode
+                            l=self.file.readframes(32468) #read from the song file
+                            self.server.broadcast(l)
+                            sleep(0.7)
+                            print "kkk"
+                                
+                    except:
+                        print "sorry, there is a problem 2"    
+
+        if self.file!=None:
+            self.file.close()
+        for clientSocket in self.server.clients: #disconnect from all the clients
+            clientSocket.send("ServerSentToClient")
+            clientSocket.close()
+
     def musicSender(self):
         l = 0 #false
         while self.keepGoing: #if the gui is still open
@@ -78,9 +101,9 @@ class Server():
                 if self.file.tell()<=self.file.getnframes(): #if thre is info and the song is not over
                     try:
                         if not self.stop: #if the song is not on stop mode
-                            #sleep(0.01)
-                            l=self.file.readframes(32) #read from the song file
+                            l=self.file.readframes(4) #read from the song file
                             self.server.broadcast(l)
+                                
                     except:
                         print "sorry, there is a problem 2"    
 

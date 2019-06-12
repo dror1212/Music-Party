@@ -12,8 +12,7 @@ class Client():
         
         #constans for the stream
         self.FORMAT=pyaudio.paInt16
-        self.FSAMP = 88800
-        self.FRAME_SIZE = 32
+        self.FSAMP = 88000
 
         self.p = pyaudio.PyAudio()
         self.clientSocket=socket.socket()
@@ -118,7 +117,7 @@ class Client():
         self.quit.start()
         self.stream.start_stream()
         try:
-            l = self.clientSocket.recv(32) #get the music from the server
+            l = self.clientSocket.recv(32768) #get the music from the server
             while self.go:
                 try:
                     self.stream.write(l) #play the music
@@ -128,7 +127,7 @@ class Client():
                                 channels=1,
                                 rate=self.FSAMP,
                                 output=True)
-                l = self.clientSocket.recv(32) #get the music from the server
+                l = self.clientSocket.recv(32768) #get the music from the server
         except:
             pass
         self.clientSocket.close()
