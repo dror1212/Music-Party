@@ -130,6 +130,7 @@ class Client():
                 l = self.clientSocket.recv(32768) #get the music from the server
         except:
             pass
+        self.disconnect()
         self.clientSocket.close()
         stream.stop_stream()
         stream.close()

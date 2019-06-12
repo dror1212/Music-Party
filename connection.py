@@ -23,8 +23,8 @@ class SocketManager():
                 if temp[clientSocket]:
                     clientSocket.send(l)
             except: #if one of the clients is not connected anymore delete it
-                pass
-            counter = counter+1
+                self.remove_user(clientSocket,counter)
+                counter = counter+1
 
     def remove_user(self,clientSocket,counter):
             print "good bye " + str(self.clientsAdresess[counter])
