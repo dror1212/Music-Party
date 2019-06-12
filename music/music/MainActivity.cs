@@ -19,6 +19,7 @@ namespace music
         EditText edt1;
         TcpClient client;
         NetworkStream stream;
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
@@ -33,7 +34,7 @@ namespace music
 
         private void BtnSend_Click(object sender, System.EventArgs e)
         {
-            client = new TcpClient("10.30.56.227", 3539);
+            client = new TcpClient("10.30.57.160", 3540);
             clientReceive();
         }
 
@@ -48,8 +49,8 @@ namespace music
                 //{
                 while (true)//Keeps Trying to Receive the Size of the Message or Data
                 {
-                    byte[] datalength = new byte[131072];
-                    if ((stream.Read(datalength, 0, 131072)) != 0)
+                    byte[] datalength = new byte[32468];
+                    if ((stream.Read(datalength, 0, 32468)) != 0)
                     {
                         PlaySound(datalength);
                     }
@@ -66,8 +67,10 @@ namespace music
         {
             try
             {
-                AudioTrack player = new AudioTrack(Android.Media.Stream.Music, 88800, ChannelOut.Mono, Android.Media.Encoding.Pcm16bit, 131072, AudioTrackMode.Static);
-                player.Write(data, 0, 131072);
+                AudioTrack player = new AudioTrack(Android.Media.Stream.Music, 88000, ChannelOut.Default, Android.Media.Encoding.Pcm16bit, 32468, AudioTrackMode.Static);
+                player.Write(data, 0, 32468);
+                //Toast.MakeText(this, "start playing", ToastLength.Short).Show();
+                //if (player.PlayState!=PlayState.Playing)
                 player.Play();
             }
             catch(IllegalStateException ex)
