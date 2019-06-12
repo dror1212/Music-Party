@@ -78,14 +78,10 @@ class Server():
         while self.keepGoing: #if the gui is still open
             if True in self.server.clients.values() and self.file!=None: #if there is someone connected
                 if self.file.tell()<=self.file.getnframes(): #if thre is info and the song is not over
-                    #try:
                         if not self.stop: #if the song is not on stop mode
                             l=self.file.readframes(32468) #read from the song file
                             self.server.broadcast(l)
-                            sleep(0.71)
-                                
-                    #except:
-                        #print "sorry, there is a problem 2"    
+                            sleep(0.732) 
 
         if self.file!=None:
             self.file.close()
@@ -97,18 +93,13 @@ class Server():
         while self.keepGoing: #if the gui is still open
             if True in self.server.clients.values() and self.file!=None: #if there is someone connected
                 if self.file.tell()<=self.file.getnframes(): #if thre is info and the song is not over
-                    #try:
                         if not self.stop: #if the song is not on stop mode
                             l=self.file.readframes(4) #read from the song file
-                            self.server.broadcast(l)
-                                
-                    #except:
-                        #print "sorry, there is a problem 2"    
+                            self.server.broadcast(l)  
 
         if self.file!=None:
             self.file.close()
         for clientSocket in self.server.clients: #disconnect from all the clients
-            clientSocket.send("ServerSentToClient")
             clientSocket.close()
             
     def musicChanger(self):
