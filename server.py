@@ -14,6 +14,7 @@ import pickle
 import md5
 from connection import SocketManager
 from DataBase import DataBase
+from MusicDownloader import musicDownloader
 
 class Server():
     def __init__(self):
@@ -22,6 +23,8 @@ class Server():
         self.server = SocketManager(3540)
 
         self.data = DataBase("DataBase.txt")
+
+        self.downloader = musicDownloader()
         #thread for repeatetly acceptong new connections
         self.new = Thread(target = self.newConnection)
         #thread for sending the data
@@ -34,6 +37,7 @@ class Server():
         #creating the base for the gui
         self.root = Tkinter.Tk()
         self.register_screen = None
+        self.downloading_screen = None
 
         self.currentSong = -1 ####################
         
@@ -291,6 +295,41 @@ class Server():
         self.username_entry.delete(0, 'end')
         self.password_entry.delete(0, 'end')
         self.username_entry.focus_set()
+
+    def dow(self):
+        self.downloading_screen.destroy()
+        self.downloading_screen = None
+
+    def downloadingPage(self):
+        if self.downloading_screen == None:
+            self.downloading_screen = Tkinter.Toplevel(self.root)
+            self.downloading_screen.title("Download")
+            self.downloading_screen.geometry("300x250")
+            self.downloading_screen.wm_iconbitmap('pictures\\head.ico')
+            self.downloading_screen.protocol("WM_DELETE_WINDOW", self.dow)
+            self.downloading_screen.resizable(0, 0)
+            link = Tkinter.StringVar()
+     
+            self.holder = Tkinter.Label(self.downloading_screen, text="Please enter details below", bg="grey")
+            self.holder.pack()
+            Tkinter.Label(self.downloading_screen, text="").pack()
+            link_lable = Tkinter.Label(self.downloading_screen, text="URL * ")
+            link_lable.pack()
+            self.link_entry = Tkinter.Entry(self.downloading_screen, textvariable=link)
+            self.link_entry.pack()
+            Tkinter.Label(self.downloading_screen, text="").pack()
+            Tkinter.Button(self.downloading_screen, text="Download", width=10, height=1, bg="grey",command = lambda: self.download(link.get())).pack()
+            self.link_entry.focus_set()
+
+    def download(self,link):
+        self.link_entry.delete(0, 'end')
+        self.link_entry.focus_set()
+        down = Thread(target = self.d,args = (link,))
+        down.start()
+        
+    def d(self,link):
+        check = self.downloader.downloadSong(link)
+        self.holder.config(text=check)
         
     def CreateTheControllBoared(self):
         #setting the title
@@ -343,7 +382,9 @@ class Server():
                                     bg="white",font = helv36)
         register = Tkinter.Button(self.root, text ="Register", command = lambda: self.registerationPage(),bg="white",
                                   font = helv2)
-
+        download = Tkinter.Button(self.root, text ="Download New Song", command = lambda: self.downloadingPage(),
+                                   bg="white",font = helv2)
+        
         #setting the size of all the objects
         playOrStop.config(height=3, width = 20,relief=Tkinter.GROOVE)
         randOrNext.config(height=1, width = 8,relief=Tkinter.GROOVE)
@@ -352,6 +393,8 @@ class Server():
         nextSong.config(height=3, width = 20,relief=Tkinter.GROOVE)
         previosSong.config(height=3, width = 20,relief=Tkinter.GROOVE)
         register.config(height=3, width = 20,relief=Tkinter.GROOVE)
+        download.config(height=3, width = 20,relief=Tkinter.GROOVE)
+
     
         #placing everything
         changeSong.place(x=308, y=80)
@@ -362,6 +405,7 @@ class Server():
         nextSong.place(x=485, y=260)
         self.currentSongDisplay.place(x=0,y=0)
         register.place(x=315, y=380)
+        download.place(x=315, y=440)
 
         self.timew = Tkinter.Scale(self.root, from_=0, to=0,tickinterval=10, orient=Tkinter.HORIZONTAL)
         self.timew.config(length = 600,width=20, fg = "white", bg = "black")
