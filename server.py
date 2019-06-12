@@ -144,7 +144,18 @@ class Server():
 
     def chooseNextSong(self):
         self.otherSong(True)
-           
+    
+    def newConnection(self): #while the app is working wait for new clients to join and add them
+        while self.keepGoing:
+            (clientSocket,clientAddress)=self.server.accept()
+            self.server.clients[clientSocket] = False
+            self.server.clientsAdresess.append(clientAddress)
+            self.server.names[clientSocket]= None
+            self.listen = Thread(target = self.server.listen_to_clients,
+                                 args = (clientSocket,self.data,))
+            self.listen.start()
+            print "welcome " + str(clientAddress) + "\n"
+            
     def updateData(self): #updating the data on the screen
         while self.keepGoing:
             try:
