@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 import youtube_dl
 
+#to make everything work download http://blog.gregzaal.com/how-to-install-ffmpeg-on-windows/
+
 class musicDownloader():
     def __init__(self):
         pass
