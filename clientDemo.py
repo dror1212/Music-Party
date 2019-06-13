@@ -12,7 +12,7 @@ class Client():
         
         #constans for the stream
         self.FORMAT=pyaudio.paInt16
-        self.FSAMP = 88000
+        self.FSAMP = 95000
 
         self.p = pyaudio.PyAudio()
         self.clientSocket=socket.socket()
@@ -142,9 +142,11 @@ class Client():
         self.login_screen.geometry("150x100")
         self.login_screen.wm_iconbitmap('pictures\\head.ico')
         self.login_screen.resizable(0, 0)
-        self.login_screen.protocol("WM_DELETE_WINDOW", self.disconnect)
+        self.login_screen.protocol("WM_DELETE_WINDOW", self.dontClose)
         Tkinter.Button(self.login_screen, text="Quit", width=150, height=100, bg="red3",font="Arial 24 bold", command = self.disconnect).pack()
 
+    def dontClose(self):
+        pass
     def disconnect(self):
         #disconnect from the server
         self.login_screen.destroy()
