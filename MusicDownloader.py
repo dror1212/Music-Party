@@ -9,6 +9,12 @@ class musicDownloader():
         pass
 
     def downloadSong(self,url,title):
+        temp = os.listdir(os.getcwd()+"\\songs")
+        for name in temp:
+            if str(name).split(".")[0]==title:
+                return "This song is already exist"
+        print temp
+        name = 'songs\\' + title
         try:
             ydl_opts = {
                 'format': 'bestaudio/best',
@@ -17,13 +23,13 @@ class musicDownloader():
                     'preferredcodec': 'wav',
                     'preferredquality': '720',
                 }],
-                'outtmpl': 'songs\\aaaa.%(ext)s'
+                'outtmpl': name +'.%(ext)s'
             }
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
                 info_dict = ydl.extract_info(url)
-                name = 'songs\\' + title + '.wav'
-                os.rename('songs\\aaaa.wav', name)
+                #name = 'songs\\' + title + '.wav'
+                #os.rename('songs\\aaaa.wav', name)
             return "download completed"
         except:
             return "something is wrong with the url"

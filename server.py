@@ -222,23 +222,24 @@ class Server():
 
     def otherSong(self,mode):
         temp = os.listdir(os.getcwd()+"\\songs")
-        if mode:
-            if len(temp)>self.currentSong+1:
-                self.currentSong+=1
-                s = temp[self.currentSong]
+        if len(temp)>0:
+            if mode:
+                if len(temp)>self.currentSong+1:
+                    self.currentSong+=1
+                    s = temp[self.currentSong]
+                else:
+                    s = temp[0]
+                    self.currentSong=0
             else:
-                s = temp[0]
-                self.currentSong=0
-        else:
-            if self.currentSong != 0:
-                self.currentSong-=1
-                s = temp[self.currentSong]
-            else:
-                s = temp[-1]
-                self.currentSong=len(temp)-1
-        print s     
-        if ".wav" in s:
-            self.newS = "songs\\"+s #save the path to the song
+                if self.currentSong != 0:
+                    self.currentSong-=1
+                    s = temp[self.currentSong]
+                else:
+                    s = temp[-1]
+                    self.currentSong=len(temp)-1
+            print s     
+            if ".wav" in s:
+                self.newS = "songs\\"+s #save the path to the song
                 
     def changeSongTime(self): #move to time that needed when the button being pressed
         if self.file!= None: #if the restart button is being pressed
