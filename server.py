@@ -124,7 +124,8 @@ class Server():
                         
                         self.newS = None
                     except:
-                        print "sorry, there is a problem"
+                        print self.newS
+                        #print "sorry, there is a problem"
             if True in self.server.clients.values():
                 if self.file!=None: #if there is someone connected
                     if not self.stop and len(self.server.clients)>0 and self.file.tell()==self.file.getnframes(): #play random song if no song has been chosen
@@ -159,7 +160,7 @@ class Server():
                                  args = (clientSocket,self.data,))
             self.listen.start()
             print "welcome " + str(clientAddress) + "\n"
-            
+        
     def updateData(self): #updating the data on the screen
         while self.keepGoing:
             try:
@@ -169,7 +170,7 @@ class Server():
                     #taking only the song name
                     name = self.song.split(".wav")[0]
                     try:
-                        self.currentSongDisplay.config(text=str(name.upper()))#showing the song name on the screen
+                        self.currentSongDisplay.config(text=name.upper())#showing the song name on the screen
                         self.currentSongDisplay.place(x=(800-self.currentSongDisplay.winfo_width())/2,y=5)
                     except:
                         pass
@@ -194,6 +195,7 @@ class Server():
         temp = fb.askopenfilename(initialdir=os.getcwd()+"\\songs",title = "Select file",filetypes=[("Wave files", "*.wav")])
         while temp==9999:
             time.sleep(0.1)
+        
         self.newS = temp
         if self.newS!="" and self.newS!=" ":
             self.currentSong = os.listdir(os.getcwd()+"\\songs").index(self.newS.split("/")[-1])
@@ -234,7 +236,7 @@ class Server():
             else:
                 s = temp[-1]
                 self.currentSong=len(temp)-1
-                
+        print s     
         if ".wav" in s:
             self.newS = "songs\\"+s #save the path to the song
                 
@@ -309,6 +311,7 @@ class Server():
             self.downloading_screen.protocol("WM_DELETE_WINDOW", self.dow)
             self.downloading_screen.resizable(0, 0)
             link = Tkinter.StringVar()
+            name = Tkinter.StringVar()
      
             self.holder = Tkinter.Label(self.downloading_screen, text="Please enter details below", bg="grey")
             self.holder.pack()
@@ -317,18 +320,24 @@ class Server():
             link_lable.pack()
             self.link_entry = Tkinter.Entry(self.downloading_screen, textvariable=link)
             self.link_entry.pack()
+            name_lable = Tkinter.Label(self.downloading_screen, text="Name For The Song * ")
+            name_lable.pack()
+            self.name_entry = Tkinter.Entry(self.downloading_screen, textvariable=name)
+            self.name_entry.pack()
             Tkinter.Label(self.downloading_screen, text="").pack()
-            Tkinter.Button(self.downloading_screen, text="Download", width=10, height=1, bg="grey",command = lambda: self.download(link.get())).pack()
+            Tkinter.Button(self.downloading_screen, text="Download", width=10, height=1, bg="grey",command = lambda: self.download(link.get(),name.get())).pack()
             self.link_entry.focus_set()
 
-    def download(self,link):
-        self.link_entry.delete(0, 'end')
-        self.link_entry.focus_set()
-        down = Thread(target = self.d,args = (link,))
-        down.start()
+    def download(self,link,name):
+        if name!="" and link!="":
+            self.link_entry.delete(0, 'end')
+            self.name_entry.delete(0, 'end')
+            self.link_entry.focus_set()
+            down = Thread(target = self.d,args = (link,name,))
+            down.start()
         
-    def d(self,link):
-        check = self.downloader.downloadSong(link)
+    def d(self,link,name):
+        check = self.downloader.downloadSong(link,name)
         self.holder.config(text=check)
         
     def CreateTheControllBoared(self):
@@ -362,7 +371,7 @@ class Server():
         vcmd = (self.root.register(self.CheckIfNumber))
 
         #Text for showing the current song
-        self.currentSongDisplay = Tkinter.Label(self.root,text="No song",font="Arial 24 bold",fg="white",bg="black")
+        self.currentSongDisplay = Tkinter.Label(self.root,text="No song",font="Arial 16 bold",fg="white",bg="black")
         #creating the buttons
         playOrStop = Tkinter.Button(self.root, text ="Stop",
                                     command = lambda: self.changeStatus(playOrStop),
