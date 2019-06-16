@@ -16,15 +16,23 @@ class Client():
 
         self.p = pyaudio.PyAudio()
         self.clientSocket=socket.socket()
-        
+
+        self.tryToConnect()
         while True: #try to connect to ip untill it works
             self.ip = None
-            self.tryToConnect()
+            self.waitForIp()
             try:
+                self.msg.config(text = "Trying to connect")
+                self.login_screen.update_idletasks()
+                self.login_screen.update()
                 self.clientSocket.connect((self.ip,3540))
                 break
             except:
-                pass
+                self.msg.config(text = "Try again, wrong IP")
+
+        self.login_screen.destroy()
+        self.login_screen = Tkinter.Tk()
+        
         self.stream = self.p.open(format=self.FORMAT,
                             channels=1,
                             rate=self.FSAMP,
@@ -41,8 +49,20 @@ class Client():
     def main(self):
         self.start()
 
+    def waitForIp(self):
+        #wait uneill you get something
+        while self.ip==None:
+            #make the gui work
+            self.login_screen.update_idletasks()
+            self.login_screen.update()
+
+            #don't overwork
+            sleep(0.1)
+
     def tryToConnect(self):
         #create the tkinter page to get the ip
+        self.msg = Tkinter.Label(self.login_screen, text="Please enter details below", bg="grey")
+        self.msg.pack()
         self.login_screen.title("Login")
         self.login_screen.geometry("300x250")
         self.login_screen.wm_iconbitmap('pictures\\head.ico')
@@ -53,18 +73,6 @@ class Client():
         self.ip_entry = Tkinter.Entry(self.login_screen, textvariable=ip)
         self.ip_entry.pack()
         Tkinter.Button(self.login_screen, text="Connect", width=10, height=1, bg="grey", command = lambda: self.getIp(ip.get())).pack()
-
-        #wait uneill you get something
-        while self.ip==None:
-            #make the gui work
-            self.login_screen.update_idletasks()
-            self.login_screen.update()
-
-            #don't overwork
-            sleep(0.1)
-        #destroy the screen when not needed
-        self.login_screen.destroy()
-        self.login_screen = Tkinter.Tk()
 
     def getIp(self,ip): #update the ip
         self.ip = ip       
