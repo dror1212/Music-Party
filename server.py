@@ -83,9 +83,9 @@ class Server():
             if True in self.server.clients.values() and self.file!=None: #if there is someone connected
                 if self.file.tell()<=self.file.getnframes(): #if thre is info and the song is not over
                         if not self.stop: #if the song is not on stop mode
-                            l=self.file.readframes(32468) #read from the song file
+                            l=self.file.readframes(16234) #read from the song file
                             self.server.broadcast(l)
-                            sleep(0.68) 
+                            sleep(0.36) 
 
         if self.file!=None:
             self.file.close()
@@ -199,7 +199,6 @@ class Server():
         self.newS = temp
         if self.newS!="" and self.newS!=" ":
             self.currentSong = os.listdir(os.getcwd()+"\\songs").index(self.newS.split("/")[-1])
-            self.setPlayStatus(b) #when choosing new song put on playing mode
 
     def setPlayStatus(self,b): #when choosing new song put on playing mode
         b.config(text="Stop",bg="red3")
