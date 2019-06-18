@@ -12,21 +12,29 @@ class Client():
         
         #constans for the stream
         self.FORMAT=pyaudio.paInt16
-        self.FSAMP = 88000
+        self.FSAMP = 44100
 
         self.p = pyaudio.PyAudio()
         self.clientSocket=socket.socket()
-        
+
+        self.tryToConnect()
         while True: #try to connect to ip untill it works
             self.ip = None
-            self.tryToConnect()
+            self.waitForIp()
             try:
+                self.msg.config(text = "Trying to connect")
+                self.login_screen.update_idletasks()
+                self.login_screen.update()
                 self.clientSocket.connect((self.ip,3540))
                 break
             except:
-                pass
+                self.msg.config(text = "Try again, wrong IP")
+
+        self.login_screen.destroy()
+        self.login_screen = Tkinter.Tk()
+        
         self.stream = self.p.open(format=self.FORMAT,
-                            channels=1,
+                            channels=2,
                             rate=self.FSAMP,
                             output=True)
         self.quit = Thread(target = self.do)
@@ -41,8 +49,20 @@ class Client():
     def main(self):
         self.start()
 
+    def waitForIp(self):
+        #wait uneill you get something
+        while self.ip==None:
+            #make the gui work
+            self.login_screen.update_idletasks()
+            self.login_screen.update()
+
+            #don't overwork
+            sleep(0.1)
+
     def tryToConnect(self):
         #create the tkinter page to get the ip
+        self.msg = Tkinter.Label(self.login_screen, text="Please enter details below", bg="grey")
+        self.msg.pack()
         self.login_screen.title("Login")
         self.login_screen.geometry("300x250")
         self.login_screen.wm_iconbitmap('pictures\\head.ico')
@@ -53,18 +73,6 @@ class Client():
         self.ip_entry = Tkinter.Entry(self.login_screen, textvariable=ip)
         self.ip_entry.pack()
         Tkinter.Button(self.login_screen, text="Connect", width=10, height=1, bg="grey", command = lambda: self.getIp(ip.get())).pack()
-
-        #wait uneill you get something
-        while self.ip==None:
-            #make the gui work
-            self.login_screen.update_idletasks()
-            self.login_screen.update()
-
-            #don't overwork
-            sleep(0.1)
-        #destroy the screen when not needed
-        self.login_screen.destroy()
-        self.login_screen = Tkinter.Tk()
 
     def getIp(self,ip): #update the ip
         self.ip = ip       
@@ -117,20 +125,20 @@ class Client():
         self.quit.start()
         self.stream.start_stream()
         try:
-            l = self.clientSocket.recv(32768) #get the music from the server
+            l = self.clientSocket.recv(16234) #get the music from the server
             while self.go:
                 try:
                     self.stream.write(l) #play the music
                 except:
                     #create new stream if there is a problem
+                    print "ccccccccccccccccccccccc"
                     self.stream = self.p.open(format=self.FORMAT,
-                                channels=1,
+                                channels=2,
                                 rate=self.FSAMP,
                                 output=True)
-                l = self.clientSocket.recv(32768) #get the music from the server
+                l = self.clientSocket.recv(16234) #get the music from the server
         except:
             pass
-        self.disconnect()
         self.clientSocket.close()
         stream.stop_stream()
         stream.close()
@@ -142,9 +150,12 @@ class Client():
         self.login_screen.geometry("150x100")
         self.login_screen.wm_iconbitmap('pictures\\head.ico')
         self.login_screen.resizable(0, 0)
-        self.login_screen.protocol("WM_DELETE_WINDOW", self.disconnect)
+        self.login_screen.protocol("WM_DELETE_WINDOW", self.dontClose)
         Tkinter.Button(self.login_screen, text="Quit", width=150, height=100, bg="red3",font="Arial 24 bold", command = self.disconnect).pack()
 
+    def dontClose(self):
+        pass
+    
     def disconnect(self):
         #disconnect from the server
         self.login_screen.destroy()
