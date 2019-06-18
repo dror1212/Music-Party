@@ -34,7 +34,7 @@ class Recorder():
         self.record = True
         stream = self.audio.open(format=self.FORMAT, channels=self.CHANNELS,
                                 rate=self.RATE, input=True,
-                                frames_per_buffer=4)
+                                frames_per_buffer=32)
         print "recording..."
         frames = []
         while self.record:
