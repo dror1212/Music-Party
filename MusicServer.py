@@ -87,6 +87,10 @@ class MusicServer(object):
             
     def chooseNextSong(self):
         self.otherSong(True)
+
+    def changeSongTime(self): #move to time that needed when the button being pressed
+        if self.file!= None: #if the restart button is being pressed
+            self.file.setpos(0) #start over the song
         
     def otherSong(self,mode):
         try:

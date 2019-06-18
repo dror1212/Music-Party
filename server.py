@@ -119,10 +119,6 @@ class Server(MusicServer):
         else:
             b.config(text="Next",bg="sienna1")
         self.rand = not self.rand
-            
-    def changeSongTime(self): #move to time that needed when the button being pressed
-        if self.file!= None: #if the restart button is being pressed
-            self.file.setpos(0) #start over the song
                     
     def callback(self): #make sure the controller want to close the app
         if tkMessageBox.askokcancel("Quit", "Do you really wish to quit?"):
