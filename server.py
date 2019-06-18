@@ -23,8 +23,6 @@ class Server():
         #creating my socket to connect with others
         self.server = SocketManager(3540)
 
-        self.data = DataBase("DataBase.txt")
-
         #thread for repeatetly acceptong new connections
         self.new = Thread(target = self.newConnection)
         #thread for sending the data
@@ -40,9 +38,8 @@ class Server():
         self.record = Recorder(self.root)
 
         self.downloader = musicDownloader(self.root)
-        
-        self.register_screen = None
-        
+
+        self.data = DataBase("DataBase.txt",self.root)
 
         self.currentSong = -1 ####################
         
@@ -82,6 +79,7 @@ class Server():
                 self.root.update()
             except:
                 break
+            
     def musicSender2(self):
         l = 0 #false
         while self.keepGoing: #if the gui is still open
@@ -241,56 +239,7 @@ class Server():
         if tkMessageBox.askokcancel("Quit", "Do you really wish to quit?"):
             self.keepGoing=False; #make everything stop
             self.root.destroy() #close the gui
-            
-    def CheckIfNumber(self, P): #check if what pressed on the keybored is number
-        try:
-            if str.isdigit(P) or P=="":
-                return True
-            else:
-                return False
-        except:
-            return False
-        
-    def res(self):
-        self.register_screen.destroy()
-        self.register_screen = None
-        
-    def registerationPage(self):
-        if self.register_screen == None:
-            self.register_screen = Tkinter.Toplevel(self.root)
-            self.register_screen.title("Register")
-            self.register_screen.geometry("300x250")
-            self.register_screen.wm_iconbitmap('pictures\\head.ico')
-            self.register_screen.protocol("WM_DELETE_WINDOW", self.res)
-            self.register_screen.resizable(0, 0)
-            username = Tkinter.StringVar()
-            password = Tkinter.StringVar()
-     
-            self.msg = Tkinter.Label(self.register_screen, text="Please enter details below", bg="grey")
-            self.msg.pack()
-            Tkinter.Label(self.register_screen, text="").pack()
-            username_lable = Tkinter.Label(self.register_screen, text="Username * ")
-            username_lable.pack()
-            self.username_entry = Tkinter.Entry(self.register_screen, textvariable=username)
-            self.username_entry.pack()
-            password_lable = Tkinter.Label(self.register_screen, text="Password * ")
-            password_lable.pack()
-            self.password_entry = Tkinter.Entry(self.register_screen, textvariable=password, show='*')
-            self.password_entry.pack()
-            Tkinter.Label(self.register_screen, text="").pack()
-            Tkinter.Button(self.register_screen, text="Register", width=10, height=1, bg="grey", command = lambda: self.register_user(username.get(),password.get())).pack()
-            self.username_entry.focus_set()
-            
-    def register_user(self,username,password):
-        b = self.data.get()
 
-        check = self.data.check_register(username,password)
-        self.msg.config(text=check)
-                
-        self.username_entry.delete(0, 'end')
-        self.password_entry.delete(0, 'end')
-        self.username_entry.focus_set()
-        
     def CreateTheControllBoared(self):
         #setting the title
         self.root.title("Music Party Controller")
@@ -298,7 +247,6 @@ class Server():
         #setting the logo
         self.root.wm_iconbitmap('pictures\\head.ico')
         #setting the background color
-        #self.root.config(bg="DarkOrange3")
 
         #setting the size of the controller
         self.root.geometry("800x550")
@@ -317,9 +265,6 @@ class Server():
         helv36 = tkFont.Font(family='Helvetica', size=15, weight='bold')
         helv2 = tkFont.Font(family='Helvetica', size=10, weight='bold')
         large_font = ('Verdana',25)
-
-        #command for checking the data goun into the entry
-        vcmd = (self.root.register(self.CheckIfNumber))
 
         #Text for showing the current song
         self.currentSongDisplay = Tkinter.Label(self.root,text="No song",font="Arial 16 bold",fg="white",bg="black")
@@ -340,7 +285,7 @@ class Server():
                                    bg="white",font = helv2)
         changeSong = Tkinter.Button(self.root, text ="Choose song", command = lambda: self.chooseNewSong(playOrStop),
                                     bg="white",font = helv36)
-        register = Tkinter.Button(self.root, text ="Register", command = lambda: self.registerationPage(),bg="white",
+        register = Tkinter.Button(self.root, text ="Register", command = lambda: self.data.Page(),bg="white",
                                   font = helv2)
         download = Tkinter.Button(self.root, text ="Download New Song", command = lambda: self.downloader.Page(),
                                    bg="white",font = helv2)
