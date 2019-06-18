@@ -18,44 +18,47 @@ class Recorder():
         self.allowedChars = [' ', '','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','-','.','_',',','\\','/','*','1','2','3','4','5','6','7','8','9','0']
 
     def start(self,name):
-        # start Recording
-        WAVE_OUTPUT_FILENAME = "songs\\" + name + ".wav"
+        try:
+            # start Recording
+            WAVE_OUTPUT_FILENAME = "songs\\" + name + ".wav"
 
-        for char in name:
-            if char not in self.allowedChars:
-                return "You can name the songs only in english"
+            for char in name:
+                if char not in self.allowedChars:
+                    return "You can name the songs only in english"
+                
+            temp = os.listdir(os.getcwd()+"\\songs")
             
-        temp = os.listdir(os.getcwd()+"\\songs")
-        
-        for name2 in temp:
-            if str(name2).split(".")[0]==name:
-                return "This song is already exist"
+            for name2 in temp:
+                if str(name2).split(".")[0]==name:
+                    return "This song is already exist"
+                
+            self.record = True
+            stream = self.audio.open(format=self.FORMAT, channels=self.CHANNELS,
+                                    rate=self.RATE, input=True,
+                                    frames_per_buffer=32)
+            print "recording..."
+            frames = []
+            while self.record:
+                self.screen.update_idletasks()
+                self.screen.update()
+                data = stream.read(4)
+                frames.append(data)
             
-        self.record = True
-        stream = self.audio.open(format=self.FORMAT, channels=self.CHANNELS,
-                                rate=self.RATE, input=True,
-                                frames_per_buffer=32)
-        print "recording..."
-        frames = []
-        while self.record:
-            self.screen.update_idletasks()
-            self.screen.update()
-            data = stream.read(4)
-            frames.append(data)
-        
-              
-        # stop Recording
-        stream.stop_stream()
-        stream.close()
-         
-        waveFile = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
-        waveFile.setnchannels(self.CHANNELS)
-        waveFile.setsampwidth(self.audio.get_sample_size(self.FORMAT))
-        waveFile.setframerate(self.RATE)
-        waveFile.writeframes(b''.join(frames))
-        waveFile.close()
-        print "finished recording"
-        return "finished recording"
+                  
+            # stop Recording
+            stream.stop_stream()
+            stream.close()
+             
+            waveFile = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
+            waveFile.setnchannels(self.CHANNELS)
+            waveFile.setsampwidth(self.audio.get_sample_size(self.FORMAT))
+            waveFile.setframerate(self.RATE)
+            waveFile.writeframes(b''.join(frames))
+            waveFile.close()
+            print "finished recording"
+            return "finished recording"
+        except:
+            return "something is wrong"
         
     def down(self):
         self.screen.destroy()
