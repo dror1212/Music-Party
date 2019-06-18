@@ -15,6 +15,7 @@ import md5
 from connection import SocketManager
 from DataBase import DataBase
 from MusicDownloader import musicDownloader
+from recorder import Recorder
 
 class Server():
     def __init__(self):
@@ -24,7 +25,6 @@ class Server():
 
         self.data = DataBase("DataBase.txt")
 
-        self.downloader = musicDownloader()
         #thread for repeatetly acceptong new connections
         self.new = Thread(target = self.newConnection)
         #thread for sending the data
@@ -36,8 +36,13 @@ class Server():
 
         #creating the base for the gui
         self.root = Tkinter.Tk()
+
+        self.record = Recorder(self.root)
+
+        self.downloader = musicDownloader(self.root)
+        
         self.register_screen = None
-        self.downloading_screen = None
+        
 
         self.currentSong = -1 ####################
         
@@ -85,27 +90,13 @@ class Server():
                         if not self.stop: #if the song is not on stop mode
                             l=self.file.readframes(16234) #read from the song file
                             self.server.broadcast(l)
-                            sleep(0.36) 
+                            sleep(0.363) 
 
         if self.file!=None:
             self.file.close()
         for clientSocket in self.server.clients: #disconnect from all the clients
             clientSocket.close()
 
-    def musicSender(self):
-        l = 0 #false
-        while self.keepGoing: #if the gui is still open
-            if True in self.server.clients.values() and self.file!=None: #if there is someone connected
-                if self.file.tell()<=self.file.getnframes(): #if thre is info and the song is not over
-                        if not self.stop: #if the song is not on stop mode
-                            l=self.file.readframes(4) #read from the song file
-                            self.server.broadcast(l)  
-
-        if self.file!=None:
-            self.file.close()
-        for clientSocket in self.server.clients: #disconnect from all the clients
-            clientSocket.close()
-            
     def musicChanger(self):
         while self.keepGoing: #if the gui is still open
             if None!=self.newS: #if there is new song being asked
@@ -220,25 +211,27 @@ class Server():
         
 
     def otherSong(self,mode):
-        temp = os.listdir(os.getcwd()+"\\songs")
-        if len(temp)>0:
-            if mode:
-                if len(temp)>self.currentSong+1:
-                    self.currentSong+=1
-                    s = temp[self.currentSong]
+        if True in self.server.clients.values(): #if there is someone connected
+            temp = os.listdir(os.getcwd()+"\\songs")
+            if len(temp)>0:
+                if mode:
+                    if len(temp)>self.currentSong+1:
+                        self.currentSong+=1
+                        s = temp[self.currentSong]
+                    else:
+                        s = temp[0]
+                        self.currentSong=0
                 else:
-                    s = temp[0]
-                    self.currentSong=0
-            else:
-                if self.currentSong != 0:
-                    self.currentSong-=1
-                    s = temp[self.currentSong]
-                else:
-                    s = temp[-1]
-                    self.currentSong=len(temp)-1
-            print s     
-            if ".wav" in s:
-                self.newS = "songs\\"+s #save the path to the song
+                    if self.currentSong != 0:
+                        self.currentSong-=1
+                        s = temp[self.currentSong]
+                    else:
+                        s = temp[-1]
+                        self.currentSong=len(temp)-1
+                print s     
+                if ".wav" in s:
+                    self.newS = "songs\\"+s #save the path to the song
+        
                 
     def changeSongTime(self): #move to time that needed when the button being pressed
         if self.file!= None: #if the restart button is being pressed
@@ -297,48 +290,6 @@ class Server():
         self.username_entry.delete(0, 'end')
         self.password_entry.delete(0, 'end')
         self.username_entry.focus_set()
-
-    def dow(self):
-        self.downloading_screen.destroy()
-        self.downloading_screen = None
-
-    def downloadingPage(self):
-        if self.downloading_screen == None:
-            self.downloading_screen = Tkinter.Toplevel(self.root)
-            self.downloading_screen.title("Download")
-            self.downloading_screen.geometry("300x250")
-            self.downloading_screen.wm_iconbitmap('pictures\\head.ico')
-            self.downloading_screen.protocol("WM_DELETE_WINDOW", self.dow)
-            self.downloading_screen.resizable(0, 0)
-            link = Tkinter.StringVar()
-            name = Tkinter.StringVar()
-     
-            self.holder = Tkinter.Label(self.downloading_screen, text="Please enter details below", bg="grey")
-            self.holder.pack()
-            Tkinter.Label(self.downloading_screen, text="").pack()
-            link_lable = Tkinter.Label(self.downloading_screen, text="URL * ")
-            link_lable.pack()
-            self.link_entry = Tkinter.Entry(self.downloading_screen, textvariable=link)
-            self.link_entry.pack()
-            name_lable = Tkinter.Label(self.downloading_screen, text="Name For The Song * ")
-            name_lable.pack()
-            self.name_entry = Tkinter.Entry(self.downloading_screen, textvariable=name)
-            self.name_entry.pack()
-            Tkinter.Label(self.downloading_screen, text="").pack()
-            Tkinter.Button(self.downloading_screen, text="Download", width=10, height=1, bg="grey",command = lambda: self.download(link.get(),name.get())).pack()
-            self.link_entry.focus_set()
-
-    def download(self,link,name):
-        if name!="" and link!="":
-            self.link_entry.delete(0, 'end')
-            self.name_entry.delete(0, 'end')
-            self.link_entry.focus_set()
-            down = Thread(target = self.d,args = (link,name,))
-            down.start()
-        
-    def d(self,link,name):
-        check = self.downloader.downloadSong(link,name)
-        self.holder.config(text=check)
         
     def CreateTheControllBoared(self):
         #setting the title
@@ -391,9 +342,10 @@ class Server():
                                     bg="white",font = helv36)
         register = Tkinter.Button(self.root, text ="Register", command = lambda: self.registerationPage(),bg="white",
                                   font = helv2)
-        download = Tkinter.Button(self.root, text ="Download New Song", command = lambda: self.downloadingPage(),
+        download = Tkinter.Button(self.root, text ="Download New Song", command = lambda: self.downloader.Page(),
                                    bg="white",font = helv2)
-        
+        record = Tkinter.Button(self.root, text ="Record", command = lambda: self.record.Page(),
+                                   bg="white",font = helv2)
         #setting the size of all the objects
         playOrStop.config(height=3, width = 20,relief=Tkinter.GROOVE)
         randOrNext.config(height=1, width = 8,relief=Tkinter.GROOVE)
@@ -403,6 +355,7 @@ class Server():
         previosSong.config(height=3, width = 20,relief=Tkinter.GROOVE)
         register.config(height=3, width = 20,relief=Tkinter.GROOVE)
         download.config(height=3, width = 20,relief=Tkinter.GROOVE)
+        record.config(height=3, width = 20,relief=Tkinter.GROOVE)
 
     
         #placing everything
@@ -415,6 +368,7 @@ class Server():
         self.currentSongDisplay.place(x=0,y=0)
         register.place(x=315, y=380)
         download.place(x=315, y=440)
+        record.place(x=630, y=0)
 
         self.timew = Tkinter.Scale(self.root, from_=0, to=0,tickinterval=10, orient=Tkinter.HORIZONTAL)
         self.timew.config(length = 600,width=20, fg = "white", bg = "black")
