@@ -1,21 +1,12 @@
-import socket
 import pyaudio
 import wave
 from time import sleep
-from time import time
 from threading import Thread
 import Tkinter
-import tkFileDialog as fb
-import tkMessageBox
 import os
 import random
-import tkFont
-import pickle
-import md5
 from connection import SocketManager
 from DataBase import DataBase
-from MusicDownloader import musicDownloader
-from recorder import Recorder
 
 class MusicServer(object):
     def __init__(self):
@@ -24,8 +15,11 @@ class MusicServer(object):
         
         #creating the base for the gui
         self.root = Tkinter.Tk()
+
+        #create the data base
         self.data = DataBase("DataBase.txt",self.root)
-        self.currentSong = -1 ####################
+        
+        self.currentSong = -1 #follow the index of the song
         self.newS = None #saving the location for new songs
         self.song = None #the song that currently is running  
         self.file = None #the file of the song
@@ -78,6 +72,7 @@ class MusicServer(object):
                     self.chooseNextSong()
 
     def chooseRandomSong(self):
+        try:
             maybeSong = self.song #make sure the random song is not the last one
             while self.song==maybeSong: #make sure the random song is not the last one
                 temp = random.choice(os.listdir(os.getcwd()+"\\songs")) #choose random file from the songs
@@ -87,31 +82,36 @@ class MusicServer(object):
                 if ".wav" in temp:
                     maybeSong=temp
             self.newS = "songs\\"+maybeSong #save the path to the song
+        except:
+            pass
             
     def chooseNextSong(self):
         self.otherSong(True)
         
     def otherSong(self,mode):
-        if True in self.server.clients.values(): #if there is someone connected
-            temp = os.listdir(os.getcwd()+"\\songs")
-            if len(temp)>0:
-                if mode:
-                    if len(temp)>self.currentSong+1:
-                        self.currentSong+=1
-                        s = temp[self.currentSong]
+        try:
+            if True in self.server.clients.values(): #if there is someone connected
+                temp = os.listdir(os.getcwd()+"\\songs")
+                if len(temp)>0:
+                    if mode:
+                        if len(temp)>self.currentSong+1:
+                            self.currentSong+=1
+                            s = temp[self.currentSong]
+                        else:
+                            s = temp[0]
+                            self.currentSong=0
                     else:
-                        s = temp[0]
-                        self.currentSong=0
-                else:
-                    if self.currentSong != 0:
-                        self.currentSong-=1
-                        s = temp[self.currentSong]
-                    else:
-                        s = temp[-1]
-                        self.currentSong=len(temp)-1
-                print s     
-                if ".wav" in s:
-                    self.newS = "songs\\"+s #save the path to the song
+                        if self.currentSong != 0:
+                            self.currentSong-=1
+                            s = temp[self.currentSong]
+                        else:
+                            s = temp[-1]
+                            self.currentSong=len(temp)-1
+                    print s     
+                    if ".wav" in s:
+                        self.newS = "songs\\"+s #save the path to the song
+        except:
+            pass
                     
     def newConnection(self): #while the app is working wait for new clients to join and add them
         while self.keepGoing:

@@ -96,8 +96,11 @@ class Server(MusicServer):
             time.sleep(0.1)
         
         self.newS = temp
-        if self.newS!="" and self.newS!=" ":
-            self.currentSong = os.listdir(os.getcwd()+"\\songs").index(self.newS.split("/")[-1])
+        if self.newS!="" and self.newS!=" " and self.newS!=None:
+            try:
+                self.currentSong = os.listdir(os.getcwd()+"\\songs").index(self.newS.split("/")[-1])
+            except:
+                pass
 
     def setPlayStatus(self,b): #when choosing new song put on playing mode
         b.config(text="Stop",bg="red3")
