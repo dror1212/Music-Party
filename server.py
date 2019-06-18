@@ -304,17 +304,17 @@ class Server():
 
     
         #placing everything
-        changeSong.place(x=308, y=80)
-        playOrStop.place(x=315, y=320)
-        randOrNext.place(x=362,y=150)
-        timeReset.place(x=315, y=260)
-        previosSong.place(x=145, y=260)
-        nextSong.place(x=485, y=260)
+        changeSong.place(x=308, y=50)
+        playOrStop.place(x=315, y=290)
+        randOrNext.place(x=362,y=120)
+        timeReset.place(x=315, y=230)
+        previosSong.place(x=145, y=230)
+        nextSong.place(x=485, y=230)
         self.currentSongDisplay.place(x=0,y=0)
-        register.place(x=315, y=380)
-        download.place(x=315, y=440)
-        record.place(x=630, y=0)
+        register.place(x=315, y=350)
+        download.place(x=315, y=410)
+        record.place(x=315, y=470)
 
         self.timew = Tkinter.Scale(self.root, from_=0, to=0,tickinterval=10, orient=Tkinter.HORIZONTAL)
         self.timew.config(length = 600,width=20, fg = "white", bg = "black")
-        self.timew.place(x = 97, y = 180)
+        self.timew.place(x = 97, y = 150)
