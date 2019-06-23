@@ -12,7 +12,7 @@ class Client():
         
         #constans for the stream
         self.FORMAT=pyaudio.paInt16
-        self.FSAMP = 44100
+        self.FSAMP = 48000
 
         self.p = pyaudio.PyAudio()
         self.clientSocket=socket.socket()

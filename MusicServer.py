@@ -35,7 +35,7 @@ class MusicServer(object):
                         if not self.stop: #if the song is not on stop mode
                             l=self.file.readframes(16234) #read from the song file
                             self.server.broadcast(l)
-                            sleep(0.363) 
+                            sleep(0.333) 
 
         if self.file!=None:
             self.file.close()
