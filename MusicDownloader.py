@@ -42,9 +42,6 @@ class musicDownloader():
             }
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
-                info_dict = ydl.extract_info(url)
-                #name = 'songs\\' + title + '.wav'
-                #os.rename('songs\\aaaa.wav', name)
             return "download completed"
         except:
             return "something is wrong"
